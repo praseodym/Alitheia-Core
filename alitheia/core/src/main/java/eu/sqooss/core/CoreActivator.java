@@ -36,6 +36,8 @@ package eu.sqooss.core;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 
 public class CoreActivator implements BundleActivator {
@@ -47,7 +49,9 @@ public class CoreActivator implements BundleActivator {
     private ServiceRegistration sregCore;
 
     public void start(BundleContext bc) throws Exception {
-        core = new AlitheiaCore(bc);
+        ApplicationContext context = new AnnotationConfigApplicationContext(SpringApplication.class);
+        context.getBean(SpringApplication.BundleContextHolder.class).setBundleContext(bc);
+        core = context.getBean(AlitheiaCore.class);
         sregCore = bc.registerService(AlitheiaCore.class.getName(), core, null);
     }
   
