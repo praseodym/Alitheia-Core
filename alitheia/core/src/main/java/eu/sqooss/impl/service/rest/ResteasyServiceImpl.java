@@ -36,15 +36,22 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 
-import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.rest.RestService;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.DisposableBean;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class ResteasyServiceImpl implements RestService, DisposableBean {
-
+	@Autowired
 	private BundleContext bc;
-    private Logger log ;
-   
+	private static final Logger logger = LoggerFactory.getLogger(ResteasyServiceImpl.class);
+
+	public ResteasyServiceImpl() {
+		addResource(eu.sqooss.rest.api.StoredProjectResource.class);
+		addResource(eu.sqooss.rest.api.MetricsResource.class);
+	}
+
 	@Override
 	public void addResource(Class<?> resource) {
 		unregisterApp();
@@ -70,7 +77,7 @@ public class ResteasyServiceImpl implements RestService, DisposableBean {
 		try {
 			http.registerServlet("/api", bridge, params, null);
 		} catch (Exception e) {
-			log.error("Error registering ResteasyServlet", e);
+			logger.error("Error registering ResteasyServlet", e);
 		}
 	}
 
@@ -87,27 +94,14 @@ public class ResteasyServiceImpl implements RestService, DisposableBean {
 		if (httpRef != null) {
 			http = (HttpService) bc.getService(httpRef);
 		} else {
-			log.error("Could not find a HTTP service!");
+			logger.error("Could not find a HTTP service!");
 		}
 		
 		return http;
 	}
 
     @Override
-    public boolean startUp() {
-        addResource(eu.sqooss.rest.api.StoredProjectResource.class);
-        addResource(eu.sqooss.rest.api.MetricsResource.class);
-        return true;
-    }
-
-    @Override
     public void destroy() {
         unregisterApp();
-    }
-
-    @Override
-    public void setInitParams(BundleContext bc, Logger l) {
-        this.bc = bc;
-        this.log = l;
     }
 }

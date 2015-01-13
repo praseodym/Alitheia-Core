@@ -46,12 +46,14 @@ import org.osgi.framework.BundleContext;
 
 import eu.sqooss.service.logging.LogManager;
 import eu.sqooss.service.logging.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class LogManagerImpl implements LogManager {
     // Our singleton manager
     public static LogManagerImpl logManager = null;
 
     // Our OSGi context; used to indicate initialization status.
+    @Autowired
     private BundleContext bc;
 
     // This map stores all of the valid and active loggers in the system.
@@ -59,7 +61,39 @@ public class LogManagerImpl implements LogManager {
 
     private CyclicLogger cyclicLogger = null;
 
-    public LogManagerImpl() {}
+    public LogManagerImpl() {
+        loggers = new HashMap<String, LoggerImpl>();
+        // The configuration is read automatically from the file log4j.properties
+        // in the bundle .jar ; this is much like calling:
+        //     PropertyConfigurator.configure("/log4j.properties");
+        // The default configuration will suppress this info message:
+
+        Enumeration<URL> props;
+        Properties p = new Properties();
+        try {
+            props = getClass().getClassLoader().getResources("log4j.properties");
+            p.load(props.nextElement().openStream());
+        } catch (Exception e) {
+            System.err.println("Logging initialisation failed, " +
+                    "cannot find log4j.properties file:" + e);
+        }
+        PropertyConfigurator.configure(p);
+        org.apache.log4j.Logger.getRootLogger().info("Logging initialized.");
+        CyclicLogger l = new CyclicLogger();
+        String pattern = bc.getProperty("eu.sqooss.logbuffer.pattern");
+        if (pattern != null) {
+            org.apache.log4j.Logger.getRootLogger().info("Logging to buffer with pattern <" + pattern + ">");
+            l.setLayout(new PatternLayout(pattern));
+        } else {
+            org.apache.log4j.Logger.getRootLogger().info("Logging to buffer with simple layout.");
+            l.setLayout(new SimpleLayout());
+        }
+        l.setThreshold(org.apache.log4j.Level.WARN);
+        org.apache.log4j.Logger.getRootLogger().addAppender(l);
+        cyclicLogger = l;
+
+        logManager = this;
+    }
 
     public LogManagerImpl(boolean testInit) {
         logManager = new LogManagerImpl();
@@ -113,46 +147,6 @@ public class LogManagerImpl implements LogManager {
         return this.bc;
     }
 
-    @Override
-	public void setInitParams(BundleContext bc, Logger l) {
-		this.bc = bc;
-	}
-
-	@Override
-	public boolean startUp() {
-	    loggers = new HashMap<String, LoggerImpl>();
-		// The configuration is read automatically from the file log4j.properties
-        // in the bundle .jar ; this is much like calling:
-        //     PropertyConfigurator.configure("/log4j.properties");
-        // The default configuration will suppress this info message:
-        
-        Enumeration<URL> props;
-        Properties p = new Properties();
-        try {
-            props = getClass().getClassLoader().getResources("log4j.properties");
-            p.load(props.nextElement().openStream());
-        } catch (Exception e) {
-            System.err.println("Logging initialisation failed, " +
-                    "cannot find log4j.properties file:" + e);
-        }
-        PropertyConfigurator.configure(p);
-        org.apache.log4j.Logger.getRootLogger().info("Logging initialized.");
-        CyclicLogger l = new CyclicLogger();
-        String pattern = bc.getProperty("eu.sqooss.logbuffer.pattern");
-        if (pattern != null) {
-            org.apache.log4j.Logger.getRootLogger().info("Logging to buffer with pattern <" + pattern + ">");
-            l.setLayout(new PatternLayout(pattern));
-        } else {
-            org.apache.log4j.Logger.getRootLogger().info("Logging to buffer with simple layout.");
-            l.setLayout(new SimpleLayout());
-        }
-        l.setThreshold(org.apache.log4j.Level.WARN);
-        org.apache.log4j.Logger.getRootLogger().addAppender(l);
-        cyclicLogger = l;
-
-        logManager = this;
-        return true;
-	}
 }
 
 // vi: ai nosi sw=4 ts=4 expandtab

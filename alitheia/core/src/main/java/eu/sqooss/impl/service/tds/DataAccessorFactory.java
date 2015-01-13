@@ -38,9 +38,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.tds.AccessorException;
 import eu.sqooss.service.tds.DataAccessor;
+import org.slf4j.Logger;
 
 /** 
  * A factory class that registers all data accessor implementations and returns

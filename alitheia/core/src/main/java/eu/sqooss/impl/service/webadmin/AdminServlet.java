@@ -39,7 +39,6 @@ import eu.sqooss.service.admin.AdminAction;
 import eu.sqooss.service.admin.AdminService;
 import eu.sqooss.service.admin.actions.AddProject;
 import eu.sqooss.service.db.DBService;
-import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.util.Pair;
 import eu.sqooss.service.webadmin.WebadminService;
 
@@ -64,6 +63,7 @@ import org.apache.velocity.VelocityContext;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
 
 public class AdminServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;

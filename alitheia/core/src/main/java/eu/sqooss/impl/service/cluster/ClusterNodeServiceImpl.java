@@ -56,8 +56,10 @@ import eu.sqooss.service.cluster.ClusterNodeService;
 import eu.sqooss.service.db.ClusterNode;
 import eu.sqooss.service.db.DBService;
 import eu.sqooss.service.db.StoredProject;
-import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.updater.UpdaterService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author George M. Zouganelis
@@ -80,9 +82,10 @@ public class ClusterNodeServiceImpl extends HttpServlet implements ClusterNodeSe
 			
 	}
 
-    private Logger logger = null;
+    private static final Logger logger = LoggerFactory.getLogger(ClusterNodeServiceImpl.class);
     private AlitheiaCore core = null;
     private HttpService httpService = null;
+    @Autowired
     private BundleContext context;
     private DBService dbs = null;
     private UpdaterService upds = null;
