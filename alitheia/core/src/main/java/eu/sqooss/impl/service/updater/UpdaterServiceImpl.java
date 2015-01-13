@@ -55,7 +55,6 @@ import eu.sqooss.service.cluster.ClusterNodeService;
 import eu.sqooss.service.db.ClusterNode;
 import eu.sqooss.service.db.DBService;
 import eu.sqooss.service.db.StoredProject;
-import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.scheduler.Job;
 import eu.sqooss.service.scheduler.Job.State;
 import eu.sqooss.service.scheduler.JobStateListener;
@@ -68,13 +67,17 @@ import eu.sqooss.service.updater.Updater;
 import eu.sqooss.service.updater.UpdaterService;
 import eu.sqooss.service.util.BidiMap;
 import eu.sqooss.service.util.GraphTS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class UpdaterServiceImpl implements UpdaterService, JobStateListener {
 
-    private Logger logger = null;
+    private static final Logger logger = LoggerFactory.getLogger(UpdaterServiceImpl.class);
     private AlitheiaCore core = null;
+
     private BundleContext context;
-    private DBService dbs = null;
+    private DBService dbs;
     
     /* Maps project-ids to the jobs that have been scheduled for 
      * each update target*/
@@ -82,6 +85,16 @@ public class UpdaterServiceImpl implements UpdaterService, JobStateListener {
     
     /* List of registered updaters */
     private BidiMap<Updater, Class<? extends MetadataUpdater>> updaters;
+
+    public UpdaterServiceImpl(BundleContext bc, DBService dbs) {
+        this.context = bc;
+        this.dbs = dbs;
+
+        updaters = new BidiMap<Updater, Class<? extends MetadataUpdater>>();
+        scheduledUpdates = new ConcurrentHashMap<Long, Map<Updater, UpdaterJob>>();
+
+        logger.info("Succesfully started updater service");
+    }
 
     /* UpdaterService interface methods*/
     /** {@inheritDoc} */
@@ -204,36 +217,6 @@ public class UpdaterServiceImpl implements UpdaterService, JobStateListener {
         }
         return false;
     }
-    
-    /* AlitheiaCoreService interface methods*/
-    @Override
-    public void shutDown() {
-        
-    }
-
-    @Override
-    public boolean startUp() {
-        core = AlitheiaCore.getInstance();
-        if (logger != null) {
-            logger.info("Got a valid reference to the logger");
-        } else {
-            System.out.println("ERROR: Updater got no logger");
-        }
-        
-        dbs = core.getDBService();
-        
-        updaters = new BidiMap<Updater, Class<? extends MetadataUpdater>>();
-        scheduledUpdates = new ConcurrentHashMap<Long, Map<Updater, UpdaterJob>>();
-        
-        logger.info("Succesfully started updater service");
-        return true;
-    }
-
-    @Override
-    public void setInitParams(BundleContext bc, Logger l) {
-        this.context = bc;
-        this.logger = l;
-    }
 
     /*Private service methods*/
     private List<Updater> getUpdatersByProtocol(String protocol) {
@@ -297,7 +280,7 @@ public class UpdaterServiceImpl implements UpdaterService, JobStateListener {
      * Add an update job of the given type or the specific updater for the project. 
      */
     private boolean update(StoredProject project, UpdaterStage stage, Updater updater) {
-        
+
         ClusterNodeService cns = null;
         
         if (project == null) {
@@ -310,25 +293,25 @@ public class UpdaterServiceImpl implements UpdaterService, JobStateListener {
         if (cns==null) {
             logger.warn("ClusterNodeService reference not found " +
             		"- ClusterNode assignment checks will be ignored");
-        } else {            
-           
+        } else {
+
             ClusterNode node = project.getClusternode();
             
             if (node == null) {
-                logger.warn("Project " + project + 
+                logger.warn("Project " + project +
                         " not assigned to any cluster node");
-            } else { 
+            } else {
                 // project is assigned , check if it is assigned to this Node
                 if (!cns.isProjectAssigned(project)) {
-                    logger.warn("Project " + project.getName() + 
+                    logger.warn("Project " + project.getName() +
                             " is not assigned to this ClusterNode - Ignoring update");
                     // TODO: Clustering - further implementation:
                     // If needed, forward Update to the appropriate ClusterNode!
-                    return true;   
-                }                
+                    return true;
+                }
             }
-        }  
-       
+        }
+
         logger.info("Request to update project:" + project.getName()  
                 + " stage:" + (stage == null?stage:"all") 
                 + " updater:" + (updater == null?updater:"all"));

@@ -33,30 +33,39 @@
 
 package eu.sqooss.core;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
+import ch.qos.logback.core.util.StatusPrinter;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import java.io.IOException;
+import java.io.InputStream;
 
 public class CoreActivator implements BundleActivator {
 
-    /** Keeps the <code>AlitheaCore</code> instance. */
-    private AlitheiaCore core;
-    
     /** Keeps the <code>AlitheaCore</code>'s service registration instance. */
     private ServiceRegistration sregCore;
+    private ConfigurableApplicationContext context;
 
     public void start(BundleContext bc) throws Exception {
-        core = new AlitheiaCore(bc);
+        SpringApplication.initialiseLogger();
+        context = SpringApplication.initialiseSpringContext(bc);
+        AlitheiaCore core = context.getBean(AlitheiaCore.class);
         sregCore = bc.registerService(AlitheiaCore.class.getName(), core, null);
     }
-  
+
     public void stop(BundleContext bc) throws Exception {
-    	core.shutDown();
+        context.close();
     	if (sregCore != null) {
     		sregCore.unregister();
     	}
-    	core = null;
     }
 }
 

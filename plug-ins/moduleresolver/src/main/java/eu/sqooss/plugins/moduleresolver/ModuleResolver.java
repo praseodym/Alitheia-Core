@@ -11,10 +11,10 @@ import eu.sqooss.service.db.ProjectFile;
 import eu.sqooss.service.db.ProjectVersion;
 import eu.sqooss.service.db.StoredProject;
 import eu.sqooss.service.fds.FileTypeMatcher;
-import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.updater.MetadataUpdater;
 import eu.sqooss.service.updater.Updater;
 import eu.sqooss.service.updater.UpdaterService.UpdaterStage;
+import org.slf4j.Logger;
 
 @Updater(descr = "Source code module resolver",
         stage = UpdaterStage.INFERENCE, 

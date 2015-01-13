@@ -56,8 +56,9 @@ import eu.sqooss.service.cluster.ClusterNodeService;
 import eu.sqooss.service.db.ClusterNode;
 import eu.sqooss.service.db.DBService;
 import eu.sqooss.service.db.StoredProject;
-import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.updater.UpdaterService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author George M. Zouganelis
@@ -80,7 +81,7 @@ public class ClusterNodeServiceImpl extends HttpServlet implements ClusterNodeSe
 			
 	}
 
-    private Logger logger = null;
+    private static final Logger logger = LoggerFactory.getLogger(ClusterNodeServiceImpl.class);
     private AlitheiaCore core = null;
     private HttpService httpService = null;
     private BundleContext context;
@@ -89,8 +90,67 @@ public class ClusterNodeServiceImpl extends HttpServlet implements ClusterNodeSe
     
     private ClusterNode thisNode = null;
 
-    public ClusterNodeServiceImpl() {}
-    
+    public ClusterNodeServiceImpl(BundleContext bc, DBService dbs, UpdaterService upds) {
+        context = bc;
+		/* Get a reference to the core service*/
+        ServiceReference serviceRef = null;
+
+        core = AlitheiaCore.getInstance();
+        this.dbs = dbs;
+        this.upds = upds;
+
+        logger.info("Got a valid reference to the logger");
+
+        /* Get a reference to the HTTP service */
+        serviceRef = context.getServiceReference("org.osgi.service.http.HttpService");
+        if (serviceRef != null) {
+            httpService = (HttpService) context.getService(serviceRef);
+            try {
+                httpService.registerServlet("/clusternode", (Servlet) this, null, null);
+            } catch (ServletException e) {
+                logger.error("Cannot register servlet to path /clusternode");
+            } catch (NamespaceException e) {
+                logger.error("Duplicate registration at path /clusternode");
+            }
+        } else {
+            logger.error("Could not load the HTTP service.");
+        }
+        logger.info("Succesfully started clusternode service");
+
+
+        // At this point, this ClusterNode has not been registered to the
+        // database yet, so do it!
+        if (thisNode == null) { // paranoia check
+            dbs.startDBSession();
+            // Check if previously registered in DB
+            Map<String, Object> serverProps = new HashMap<String, Object>(1);
+            serverProps.put("name", localServerName);
+            List<ClusterNode> s = dbs.findObjectsByProperties(
+                    ClusterNode.class, serverProps);
+
+            if (s.isEmpty()) {
+                // not registered yet, create a record in DB
+                thisNode = new ClusterNode();
+                thisNode.setName(localServerName);
+                if (!dbs.addRecord(thisNode)) {
+                    logger.error("Failed to register ClusterNode <"
+                            + localServerName + ">");
+                    dbs.rollbackDBSession();
+                } else {
+                    dbs.commitDBSession();
+                    logger.info("ClusterNode <" + localServerName
+                            + "> registered succesfully.");
+                }
+            } else {
+                // already registered, keep the record from DB
+                dbs.rollbackDBSession();
+                thisNode = s.get(0);
+                logger.info("ClusterNode <" + localServerName
+                        + "> registered succesfully.");
+            }
+        }
+    }
+
     public String getClusterNodeName(){
 	   return thisNode.getName();
     }
@@ -382,83 +442,4 @@ public class ClusterNodeServiceImpl extends HttpServlet implements ClusterNodeSe
         	 
         }
     }
-
-	@Override
-	public void setInitParams(BundleContext bc, Logger l) {
-		this.context = bc;
-		this.logger = l;
-	}
-
-	@Override
-	public void shutDown() {}
-
-	@Override
-	public boolean startUp() {
-		
-		/* Get a reference to the core service*/
-        ServiceReference serviceRef = null;
-      
-        core = AlitheiaCore.getInstance();
-        dbs = core.getDBService();
-        upds = core.getUpdater();
-        if (logger != null) {
-            logger.info("Got a valid reference to the logger");
-        } else {
-            System.out.println("ERROR: ClusteNodeService got no logger");
-        }
-
-        /* Get a reference to the HTTP service */
-        serviceRef = context.getServiceReference("org.osgi.service.http.HttpService");
-        if (serviceRef != null) {
-            httpService = (HttpService) context.getService(serviceRef);
-           	try {
-				httpService.registerServlet("/clusternode", (Servlet) this, null, null);
-			} catch (ServletException e) {
-				logger.error("Cannot register servlet to path /clusternode");
-				return false;
-			} catch (NamespaceException e) {
-				logger.error("Duplicate registration at path /clusternode");
-				return false;
-			}
-        } else {
-            logger.error("Could not load the HTTP service.");
-        }
-        logger.info("Succesfully started clusternode service");
-
-		
-		// At this point, this ClusterNode has not been registered to the
-		// database yet, so do it!
-		if (thisNode == null) { // paranoia check
-			dbs.startDBSession();
-			// Check if previously registered in DB
-			Map<String, Object> serverProps = new HashMap<String, Object>(1);
-			serverProps.put("name", localServerName);
-			List<ClusterNode> s = dbs.findObjectsByProperties(
-					ClusterNode.class, serverProps);
-
-			if (s.isEmpty()) {
-				// not registered yet, create a record in DB
-				thisNode = new ClusterNode();
-				thisNode.setName(localServerName);
-				if (!dbs.addRecord(thisNode)) {
-					logger.error("Failed to register ClusterNode <"
-							+ localServerName + ">");
-					dbs.rollbackDBSession();
-					return false;
-				} else {
-					dbs.commitDBSession();
-					logger.info("ClusterNode <" + localServerName
-							+ "> registered succesfully.");
-					return true;
-				}
-			} else {
-				// already registered, keep the record from DB
-				dbs.rollbackDBSession();
-				thisNode = s.get(0);
-				logger.info("ClusterNode <" + localServerName
-						+ "> registered succesfully.");
-			}
-		}
-		return true;
-	}
 }

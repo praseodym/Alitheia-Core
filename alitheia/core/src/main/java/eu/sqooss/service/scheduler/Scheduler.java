@@ -33,11 +33,11 @@
 
 package eu.sqooss.service.scheduler;
 
+import eu.sqooss.core.AlitheiaCoreService;
+
 import java.util.Deque;
 import java.util.List;
 import java.util.Set;
-
-import eu.sqooss.core.AlitheiaCoreService;
 
 /**
  * Interface for the scheduler.

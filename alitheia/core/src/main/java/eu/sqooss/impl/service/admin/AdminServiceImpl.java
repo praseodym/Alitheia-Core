@@ -44,8 +44,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
-import org.osgi.framework.BundleContext;
-
 import eu.sqooss.core.AlitheiaCore;
 import eu.sqooss.service.admin.AdminAction;
 import eu.sqooss.service.admin.AdminService;
@@ -54,7 +52,8 @@ import eu.sqooss.service.admin.actions.AddProject;
 import eu.sqooss.service.admin.actions.RunTimeInfo;
 import eu.sqooss.service.admin.actions.UpdateProject;
 import eu.sqooss.service.db.DBService;
-import eu.sqooss.service.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of the {@link AdminService} interface. Tracks all submitted
@@ -73,14 +72,18 @@ public class AdminServiceImpl extends Thread implements AdminService {
     ConcurrentMap<Long, ActionContainer> liveactions;
     AtomicLong id;
 
-    Logger log;
+    private static final Logger logger = LoggerFactory.getLogger(AdminServiceImpl.class);
 
     public AdminServiceImpl() {
         liveactions = new ConcurrentHashMap<Long, ActionContainer>();
         id = new AtomicLong();
         //if (AlitheiaCore.getInstance() != null)
-        //    log = AlitheiaCore.getInstance().getLogManager().createLogger("sqooss.admin");
+        //    logger = AlitheiaCore.getInstance().getLogManager().createLogger("sqooss.admin");
         start();
+
+        services.put(AddProject.MNEMONIC, AddProject.class);
+        services.put(RunTimeInfo.MNEMONIC, RunTimeInfo.class);
+        services.put(UpdateProject.MNEMONIC, UpdateProject.class);
     }
 
     public static void registerAction(String uniq,
@@ -254,39 +257,22 @@ public class AdminServiceImpl extends Thread implements AdminService {
     }
     
     private void debug(String msg) {
-        if (log != null)
-            log.debug(msg);
+        if (logger != null)
+            logger.debug(msg);
     }
     
     private void err(String msg) {
-        if (log != null)
-            log.error(msg);
+        if (logger != null)
+            logger.error(msg);
     }
     
     private void err(String msg, Exception e) {
-        if (log != null)
-            log.error(msg, e);
+        if (logger != null)
+            logger.error(msg, e);
     }
         
     private void info(String msg) {
-        if (log != null)
-            log.info(msg);
+        if (logger != null)
+            logger.info(msg);
     }
-
-	@Override
-	public boolean startUp() {
-		services.put(AddProject.MNEMONIC, AddProject.class);
-		services.put(RunTimeInfo.MNEMONIC, RunTimeInfo.class);
-		services.put(UpdateProject.MNEMONIC, UpdateProject.class);
-		return true;
-	}
-
-	@Override
-	public void shutDown() {
-	}
-
-	@Override
-	public void setInitParams(BundleContext bc, Logger l) {
-		log = l;
-	}
 }

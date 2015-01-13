@@ -41,12 +41,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.*;
 
 import eu.sqooss.core.AlitheiaCore;
 import eu.sqooss.service.abstractmetric.AlitheiaPlugin;
@@ -55,12 +50,14 @@ import eu.sqooss.service.db.DBService;
 import eu.sqooss.service.db.Metric;
 import eu.sqooss.service.db.Plugin;
 import eu.sqooss.service.db.PluginConfiguration;
-import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.pa.PluginAdmin;
 import eu.sqooss.service.pa.PluginInfo;
 import eu.sqooss.service.scheduler.Job;
 import eu.sqooss.service.scheduler.Scheduler;
 import eu.sqooss.service.scheduler.SchedulerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class PAServiceImpl implements PluginAdmin, ServiceListener {
 
@@ -85,10 +82,11 @@ public class PAServiceImpl implements PluginAdmin, ServiceListener {
     /* ===[ Global variable ]============================================= */
 
     // The parent bundle's context object
+    @Autowired
     private BundleContext bc;
 
     // Required SQO-OSS components
-    private Logger logger;
+    private static final Logger logger = LoggerFactory.getLogger(PAServiceImpl.class);
     private DBService sobjDB = null;
     private AlitheiaCore sobjCore = null;
     
@@ -99,7 +97,22 @@ public class PAServiceImpl implements PluginAdmin, ServiceListener {
     private ConcurrentHashMap<String, PluginInfo> registeredPlugins =
         new ConcurrentHashMap<String, PluginInfo>();
 
-    public PAServiceImpl () { }
+    public PAServiceImpl (BundleContext bc, DBService db) {
+        logger.info("Starting the PluginAdmin component.");
+
+        // Get the AlitheiaCore's object
+
+        // Obtain the required core components
+        sobjDB = db;
+
+        try {
+            bc.addServiceListener(this, SREF_FILTER_PLUGIN);
+        } catch (InvalidSyntaxException e) {
+            logger.error("Invalid filter syntax ", e);
+        }
+
+        logger.debug("The PluginAdmin component was successfully started.");
+    }
 
     /**
      * Retrieves the service Id of the specified service reference.
@@ -685,45 +698,6 @@ public class PAServiceImpl implements PluginAdmin, ServiceListener {
             return "PluginUninstallJob - ServiceID:{" + serviceID + "}" ;
         }
     }
-
-	@Override
-	public boolean startUp() {
-	    logger.info("Starting the PluginAdmin component.");
-
-        // Get the AlitheiaCore's object
-        sobjCore = AlitheiaCore.getInstance();
-
-        if (sobjCore != null) {
-            // Obtain the required core components
-            sobjDB = sobjCore.getDBService();
-            if (sobjDB == null) {
-                logger.error("Can not obtain the DB object!");
-            }
-
-            try {
-                bc.addServiceListener(this, SREF_FILTER_PLUGIN);
-            } catch (InvalidSyntaxException e) {
-                logger.error("Invalid filter syntax ", e);
-            }
-            
-            logger.debug("The PluginAdmin component was successfully started.");
-        }
-        else {
-            logger.error("Can not obtain the Core object!");
-        }
-		return true;
-	}
-
-	@Override
-	public void shutDown() {
-		return ;
-	}
-
-	@Override
-	public void setInitParams(BundleContext bc, Logger l) {
-	    this.bc = bc;
-        this.logger = l;
-	}
 }
 
 //vi: ai nosi sw=4 ts=4 expandtab

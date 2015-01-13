@@ -31,17 +31,18 @@ public class AdminServiceImplTest {
 
     @Test
     public void testRegisterAdminAction() {
+        // AddProject, RunTimeInfo, UpdateProject actions added in constructor
         RunTimeInfo rti = new RunTimeInfo();
         impl.registerAdminAction(rti.mnemonic(), RunTimeInfo.class);
-        assertEquals(1, impl.getAdminActions().size());
+        assertEquals(3, impl.getAdminActions().size());
 
         FailingAction fa = new FailingAction();
         impl.registerAdminAction(fa.mnemonic(), FailingAction.class);
-        assertEquals(2, impl.getAdminActions().size());
+        assertEquals(4, impl.getAdminActions().size());
 
         SucceedingAction su = new SucceedingAction();
         impl.registerAdminAction(su.mnemonic(), SucceedingAction.class);
-        assertEquals(3, impl.getAdminActions().size());
+        assertEquals(5, impl.getAdminActions().size());
     }
 
     @Test

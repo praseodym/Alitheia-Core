@@ -30,9 +30,9 @@
 
 package eu.sqooss.service.admin;
 
-import java.util.Set;
-
 import eu.sqooss.core.AlitheiaCoreService;
+
+import java.util.Set;
 
 /**
  * A service that contains and executes administrative actions on behalf of

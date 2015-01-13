@@ -16,7 +16,6 @@
         <include>org.tmatesoft.svnkit:svnkit</include>
         <include>org.antlr:antlr-runtime</include>
         <include>org.slf4j:slf4j-api</include>
-        <include>org.slf4j:slf4j-jdk14</include>
       </includes>
       <scope>provided</scope>
     </dependencySet>

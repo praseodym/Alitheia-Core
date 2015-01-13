@@ -43,18 +43,32 @@ import eu.sqooss.core.AlitheiaCoreService;
 import eu.sqooss.service.db.ClusterNode;
 import eu.sqooss.service.db.DBService;
 import eu.sqooss.service.db.StoredProject;
-import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.tds.DataAccessor;
 import eu.sqooss.service.tds.ProjectAccessor;
 import eu.sqooss.service.tds.TDSService;
 import eu.sqooss.service.util.URIUtills;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TDSServiceImpl implements TDSService, AlitheiaCoreService {
-    private Logger logger = null;
+    private static final Logger logger = LoggerFactory.getLogger(TDSServiceImpl.class);
     private ConcurrentHashMap<Long, ProjectDataAccessorImpl> accessorPool;
     private ConcurrentHashMap<ProjectDataAccessorImpl, Integer> accessorClaims;
     
-    public TDSServiceImpl() {}
+    public TDSServiceImpl() {
+        ProjectDataAccessorImpl.logger = logger;
+
+        //Wake up the DataAccessorFactory
+        new DataAccessorFactory(logger);
+
+        //Init accessor store
+        accessorPool = new ConcurrentHashMap<Long,ProjectDataAccessorImpl>();
+        accessorClaims = new ConcurrentHashMap<ProjectDataAccessorImpl, Integer>();
+
+        logger.info("TDS service created.");
+
+        stuffer();
+    }
 
     // Interface methods
 
@@ -157,33 +171,6 @@ public class TDSServiceImpl implements TDSService, AlitheiaCoreService {
 
         logger.info("TDS Stuffer is finished.");
     }
-
-	@Override
-	public void shutDown() {
-		
-	}
-
-	@Override
-	public boolean startUp() {
-        ProjectDataAccessorImpl.logger = logger;
-
-        //Wake up the DataAccessorFactory
-        new DataAccessorFactory(logger);
-
-        //Init accessor store
-        accessorPool = new ConcurrentHashMap<Long,ProjectDataAccessorImpl>();
-        accessorClaims = new ConcurrentHashMap<ProjectDataAccessorImpl, Integer>();
-       
-        logger.info("TDS service created.");
-        
-		stuffer();
-		return true;
-	}
-
-	@Override
-	public void setInitParams(BundleContext bc, Logger l) {
-	    this.logger = l;
-	}
 
     @Override
     public void registerPlugin(String[] protocols, Class<? extends DataAccessor> clazz) {

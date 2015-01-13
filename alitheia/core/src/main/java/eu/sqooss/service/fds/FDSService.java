@@ -33,14 +33,14 @@
 
 package eu.sqooss.service.fds;
 
-import java.io.File;
-import java.io.InputStream;
-import java.util.regex.Pattern;
-
 import eu.sqooss.core.AlitheiaCoreService;
 import eu.sqooss.service.db.ProjectFile;
 import eu.sqooss.service.db.ProjectVersion;
 import eu.sqooss.service.db.StoredProject;
+
+import java.io.File;
+import java.io.InputStream;
+import java.util.regex.Pattern;
 
 /**
  * The FDS (Fat Data Service) is the part of the data access layer that

@@ -65,8 +65,11 @@ import org.osgi.framework.BundleContext;
 import eu.sqooss.core.AlitheiaCoreService;
 import eu.sqooss.service.db.DAObject;
 import eu.sqooss.service.db.DBService;
-import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.util.URIUtills;
+import org.springframework.beans.factory.DisposableBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Implementation of the Database service, using Hibernate's Thread-based session handling
@@ -75,7 +78,7 @@ import eu.sqooss.service.util.URIUtills;
  * @author Romain Pokrzywka, Georgios Gousios
  * 
  */
-public class DBServiceImpl implements DBService, AlitheiaCoreService {
+public class DBServiceImpl implements DBService, AlitheiaCoreService, DisposableBean {
 
     private static DBService instance;
     
@@ -119,8 +122,8 @@ public class DBServiceImpl implements DBService, AlitheiaCoreService {
     private static final String DB_USERNAME = "eu.sqooss.db.user";
     private static final String DB_PASSWORD = "eu.sqooss.db.passwd";
     private static final String DB_CONPOOL = "eu.sqooss.db.conpool";
-    
-    private Logger logger = null;
+
+    private static final Logger logger = LoggerFactory.getLogger(DBServiceImpl.class);
     private SessionFactory sessionFactory = null;
     private BundleContext bc = null;
     private AtomicBoolean isInitialised = new AtomicBoolean(false);
@@ -283,20 +286,34 @@ public class DBServiceImpl implements DBService, AlitheiaCoreService {
         return true;
     }
     
-    public DBServiceImpl() { }
+    public DBServiceImpl(BundleContext context) {
+        bc = context;
+        String db  = bc.getProperty(DB).toLowerCase();
+        String cs = connString.get(db);
+        cs = cs.replaceAll("<HOST>", bc.getProperty(DB_HOST));
+        cs = cs.replaceAll("<SCHEMA>", bc.getProperty(DB_SCHEMA));
+
+        conProp.setProperty("hibernate.connection.driver_class",  drivers.get(db));
+        conProp.setProperty("hibernate.connection.url", cs);
+        conProp.setProperty("hibernate.connection.username", bc.getProperty(DB_USERNAME));
+        conProp.setProperty("hibernate.connection.password", bc.getProperty(DB_PASSWORD));
+        conProp.setProperty("hibernate.connection.dialect",  hbmDialects.get(db));
+        conProp.setProperty("hibernate.connection.provider_class", conPools.get(bc.getProperty(DB_CONPOOL)));
+
+        if (!getJDBCConnection()) {
+            logger.error("DB service got no JDBC connectors.");
+        }
+
+        initHibernate(bc.getBundle().getResource("hibernate.cfg.xml"));
+
+        isInitialised.compareAndSet(false, true);
+    }
     
     public DBServiceImpl(Properties p, URL configFileURL, Logger l) { 
         this.conProp = p;
-        this.logger = l;
         initHibernate(configFileURL);
         isInitialised.compareAndSet(false, true);
         instance = this;
-    }
-    
-    public static DBService getInstance() {
-        if (instance == null)
-            instance = new DBServiceImpl();
-        return instance;
     }
 
     public <T extends DAObject> T findObjectById(Class<T> daoClass, long id) {
@@ -745,7 +762,7 @@ public class DBServiceImpl implements DBService, AlitheiaCoreService {
         if (!checkSession()) {
             return -1;
         }
-        
+
         try {
             Session s = sessionFactory.getCurrentSession();
             Query query = s.createQuery(hql);
@@ -754,9 +771,9 @@ public class DBServiceImpl implements DBService, AlitheiaCoreService {
                     query.setParameter(param, params.get(param));
                 }
             }
-            
+
             return query.executeUpdate();
-            
+
         } catch (QueryException e) {
             logExceptionAndTerminateSession(e);
             throw e;
@@ -774,42 +791,11 @@ public class DBServiceImpl implements DBService, AlitheiaCoreService {
     }
 
     @Override
-    public boolean startUp() {
-        String db  = bc.getProperty(DB).toLowerCase();
-        String cs = connString.get(db);
-        cs = cs.replaceAll("<HOST>", bc.getProperty(DB_HOST));
-        cs = cs.replaceAll("<SCHEMA>", bc.getProperty(DB_SCHEMA));
-            
-        conProp.setProperty("hibernate.connection.driver_class",  drivers.get(db));
-        conProp.setProperty("hibernate.connection.url", cs);
-        conProp.setProperty("hibernate.connection.username", bc.getProperty(DB_USERNAME));
-        conProp.setProperty("hibernate.connection.password", bc.getProperty(DB_PASSWORD));
-        conProp.setProperty("hibernate.connection.dialect",  hbmDialects.get(db));
-        conProp.setProperty("hibernate.connection.provider_class", conPools.get(bc.getProperty(DB_CONPOOL)));
-        
-        if (!getJDBCConnection()) {
-            logger.error("DB service got no JDBC connectors.");
-            return false;
-        }
-        
-        if(!initHibernate(bc.getBundle().getResource("hibernate.cfg.xml")))
-            return false;
-        
-        isInitialised.compareAndSet(false, true);
-        return true; 
-    }
-
-    @Override
-    public void shutDown() {
+    public void destroy() {
     	logger.info("Shutting down database service");
     	sessionFactory.close();
     }
 
-	@Override
-	public void setInitParams(BundleContext bc, Logger l) {
-		this.bc = bc;
-        this.logger = l;
-	}
 }
 
 //vi: ai nosi sw=4 ts=4 expandtab

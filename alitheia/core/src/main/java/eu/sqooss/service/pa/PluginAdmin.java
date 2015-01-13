@@ -33,12 +33,12 @@
 
 package eu.sqooss.service.pa;
 
-import java.util.Collection;
-import java.util.List;
-
 import eu.sqooss.core.AlitheiaCoreService;
 import eu.sqooss.service.abstractmetric.AlitheiaPlugin;
 import eu.sqooss.service.db.DAObject;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * <code>PluginAdmin</code> defines an interface for classes, that provide

@@ -12,7 +12,6 @@ import eu.sqooss.service.db.DBService;
 import eu.sqooss.service.db.Language;
 import eu.sqooss.service.db.ProjectVersion;
 import eu.sqooss.service.db.StoredProject;
-import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.scheduler.Job;
 import eu.sqooss.service.scheduler.Job.State;
 import eu.sqooss.service.scheduler.JobStateListener;
@@ -20,6 +19,7 @@ import eu.sqooss.service.updater.MetadataUpdater;
 import eu.sqooss.service.updater.Parser;
 import eu.sqooss.service.updater.Updater;
 import eu.sqooss.service.updater.UpdaterService.UpdaterStage;
+import org.slf4j.Logger;
 
 /**
  * Extracts method, function and namespace information and fills in the 
