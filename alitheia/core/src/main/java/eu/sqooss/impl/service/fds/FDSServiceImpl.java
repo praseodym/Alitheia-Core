@@ -36,16 +36,13 @@ package eu.sqooss.impl.service.fds;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import eu.sqooss.service.util.FileUtils;
-import org.apache.commons.codec.binary.Hex;
 import org.osgi.framework.BundleContext;
 
 import eu.sqooss.core.AlitheiaCore;
@@ -58,7 +55,6 @@ import eu.sqooss.service.fds.FDSService;
 import eu.sqooss.service.fds.InMemoryCheckout;
 import eu.sqooss.service.fds.OnDiskCheckout;
 import eu.sqooss.service.fds.Timeline;
-import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.tds.InvalidAccessorException;
 import eu.sqooss.service.tds.InvalidProjectRevisionException;
 import eu.sqooss.service.tds.InvalidRepositoryException;
@@ -67,11 +63,14 @@ import eu.sqooss.service.tds.ProjectAccessor;
 import eu.sqooss.service.tds.Revision;
 import eu.sqooss.service.tds.SCMAccessor;
 import eu.sqooss.service.tds.TDSService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /** {@inheritDoc} */
 public class FDSServiceImpl implements FDSService, Runnable {
     /** The logger for the FDS. */
-    private Logger logger = null;
+    private static final Logger logger = LoggerFactory.getLogger(FDSServiceImpl.class);
     /** We use the TDS for raw data access. */
     private TDSService tds = null;
 
@@ -100,6 +99,7 @@ public class FDSServiceImpl implements FDSService, Runnable {
      */
     private ConcurrentHashMap<OnDiskCheckout, Integer> checkoutHandles;
 
+    @Autowired
     private BundleContext bc;
     
     /*
@@ -121,7 +121,23 @@ public class FDSServiceImpl implements FDSService, Runnable {
      */
     private static final int INT_AS_HEX_LENGTH = 8;
 
-    public FDSServiceImpl() { }
+    public FDSServiceImpl() {
+        tds = AlitheiaCore.getInstance().getTDSService();
+        logger.info("Got TDS service for FDS.");
+
+        checkoutCache = new ConcurrentHashMap<String, OnDiskCheckout>();
+        checkoutHandles = new ConcurrentHashMap<OnDiskCheckout, Integer>();
+        // Get the checkout root from the properties file.
+        String s = bc.getProperty("eu.sqooss.fds.root");
+        if (s == null) {
+            logger.info("No eu.sqooss.fds.root set, using default /var/tmp/alitheia");
+            s = "/var/tmp/alitheia";
+        } else {
+            logger.info("FDS root directory " + s);
+        }
+        fdsCheckoutRoot = new File(s);
+        randomCheckout = new Random();
+    }
 
     /**
      * The FDS considers its checkout root to be 'private' and will write all
@@ -670,12 +686,6 @@ public class FDSServiceImpl implements FDSService, Runnable {
     }
 
     @Override
-    public void setInitParams(BundleContext bc, Logger l) {
-        logger = l;
-        this.bc = bc;
-    }
-
-    @Override
     public void shutDown() {
         String s = bc.getProperty("eu.sqooss.fds.cleanupOnExit");
 
@@ -686,26 +696,6 @@ public class FDSServiceImpl implements FDSService, Runnable {
         }
     }
 
-    @Override
-    public boolean startUp() {
-        tds = AlitheiaCore.getInstance().getTDSService();
-        logger.info("Got TDS service for FDS.");
-
-        checkoutCache = new ConcurrentHashMap<String, OnDiskCheckout>();
-        checkoutHandles = new ConcurrentHashMap<OnDiskCheckout, Integer>();
-        // Get the checkout root from the properties file.
-        String s = bc.getProperty("eu.sqooss.fds.root");
-        if (s == null) {
-            logger.info("No eu.sqooss.fds.root set, using default /var/tmp/alitheia");
-            s = "/var/tmp/alitheia";
-        } else {
-            logger.info("FDS root directory " + s);
-        }
-        fdsCheckoutRoot = new File(s);
-        randomCheckout = new Random();
-
-        return true;
-    }
 }
 
 // vi: ai nosi sw=4 ts=4 expandtab

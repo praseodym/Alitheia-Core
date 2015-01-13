@@ -55,7 +55,6 @@ import eu.sqooss.service.cluster.ClusterNodeService;
 import eu.sqooss.service.db.ClusterNode;
 import eu.sqooss.service.db.DBService;
 import eu.sqooss.service.db.StoredProject;
-import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.scheduler.Job;
 import eu.sqooss.service.scheduler.Job.State;
 import eu.sqooss.service.scheduler.JobStateListener;
@@ -68,11 +67,16 @@ import eu.sqooss.service.updater.Updater;
 import eu.sqooss.service.updater.UpdaterService;
 import eu.sqooss.service.util.BidiMap;
 import eu.sqooss.service.util.GraphTS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class UpdaterServiceImpl implements UpdaterService, JobStateListener {
 
-    private Logger logger = null;
+    private static final Logger logger = LoggerFactory.getLogger(UpdaterServiceImpl.class);
     private AlitheiaCore core = null;
+
+    @Autowired
     private BundleContext context;
     private DBService dbs = null;
     
@@ -82,6 +86,22 @@ public class UpdaterServiceImpl implements UpdaterService, JobStateListener {
     
     /* List of registered updaters */
     private BidiMap<Updater, Class<? extends MetadataUpdater>> updaters;
+
+    public UpdaterServiceImpl() {
+        core = AlitheiaCore.getInstance();
+        if (logger != null) {
+            logger.info("Got a valid reference to the logger");
+        } else {
+            System.out.println("ERROR: Updater got no logger");
+        }
+
+        dbs = core.getDBService();
+
+        updaters = new BidiMap<Updater, Class<? extends MetadataUpdater>>();
+        scheduledUpdates = new ConcurrentHashMap<Long, Map<Updater, UpdaterJob>>();
+
+        logger.info("Succesfully started updater service");
+    }
 
     /* UpdaterService interface methods*/
     /** {@inheritDoc} */
@@ -209,30 +229,6 @@ public class UpdaterServiceImpl implements UpdaterService, JobStateListener {
     @Override
     public void shutDown() {
         
-    }
-
-    @Override
-    public boolean startUp() {
-        core = AlitheiaCore.getInstance();
-        if (logger != null) {
-            logger.info("Got a valid reference to the logger");
-        } else {
-            System.out.println("ERROR: Updater got no logger");
-        }
-        
-        dbs = core.getDBService();
-        
-        updaters = new BidiMap<Updater, Class<? extends MetadataUpdater>>();
-        scheduledUpdates = new ConcurrentHashMap<Long, Map<Updater, UpdaterJob>>();
-        
-        logger.info("Succesfully started updater service");
-        return true;
-    }
-
-    @Override
-    public void setInitParams(BundleContext bc, Logger l) {
-        this.context = bc;
-        this.logger = l;
     }
 
     /*Private service methods*/

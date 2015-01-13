@@ -61,7 +61,6 @@ import eu.sqooss.service.db.NameSpace;
 import eu.sqooss.service.db.ProjectFile;
 import eu.sqooss.service.db.ProjectVersion;
 import eu.sqooss.service.db.StoredProject;
-import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.metricactivator.MetricActivator;
 import eu.sqooss.service.pa.PluginAdmin;
 import eu.sqooss.service.pa.PluginInfo;
@@ -69,14 +68,18 @@ import eu.sqooss.service.scheduler.Job;
 import eu.sqooss.service.scheduler.Scheduler;
 import eu.sqooss.service.scheduler.SchedulerException;
 import eu.sqooss.service.util.GraphTS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class MetricActivatorImpl  implements MetricActivator {
 
     /** The parent bundle's context object. */
+    @Autowired
     private BundleContext bc;
 
     private AlitheiaCore core;
-    private Logger logger;
+    private static final Logger logger = LoggerFactory.getLogger(MetricActivatorImpl.class);
     private PluginAdmin pa;
     private DBService db;
     private Scheduler sched;
@@ -86,7 +89,34 @@ public class MetricActivatorImpl  implements MetricActivator {
     
     private HashMap<MetricType.Type, Class<? extends DAObject>> metricTypesToActivators;
     
-    public MetricActivatorImpl() { }
+    public MetricActivatorImpl() {
+        metricTypesToActivators = new HashMap<Type, Class<? extends DAObject>>();
+        metricTypesToActivators.put(Type.NAMESPACE, NameSpace.class);
+        metricTypesToActivators.put(Type.ENCAPSUNIT, EncapsulationUnit.class);
+        metricTypesToActivators.put(Type.EXECUNIT, ExecutionUnit.class);
+        metricTypesToActivators.put(Type.SOURCE_DIRECTORY, ProjectFile.class);
+        metricTypesToActivators.put(Type.SOURCE_FILE, ProjectFile.class);
+        metricTypesToActivators.put(Type.BUG, Bug.class);
+        metricTypesToActivators.put(Type.PROJECT_VERSION, ProjectVersion.class);
+        metricTypesToActivators.put(Type.MAILING_LIST, MailingList.class);
+        metricTypesToActivators.put(Type.MAILMESSAGE, MailMessage.class);
+        metricTypesToActivators.put(Type.MAILTHREAD, MailingListThread.class);
+
+        core = AlitheiaCore.getInstance();
+
+        priority = new AtomicLong();
+        //Lower priorities are reserved for updater jobs
+        priority.set(0x1000);
+
+        this.pa = core.getPluginAdmin();
+        this.db = core.getDBService();
+        this.sched = core.getScheduler();
+
+        String sync = bc.getProperty("eu.sqooss.metricactivator.sync");
+
+        if (sync != null && sync.equalsIgnoreCase("fast"))
+            this.fastSync = true;
+    }
 
     @Override
 	public <T extends DAObject> void runMetric(T resource, AlitheiaPlugin ap) {
@@ -396,46 +426,9 @@ public class MetricActivatorImpl  implements MetricActivator {
     }
 
 	@Override
-	public void setInitParams(BundleContext bc, Logger l) {
-		this.bc = bc;
-		this.logger = l;
-		
-        metricTypesToActivators = new HashMap<Type, Class<? extends DAObject>>();
-        metricTypesToActivators.put(Type.NAMESPACE, NameSpace.class);
-        metricTypesToActivators.put(Type.ENCAPSUNIT, EncapsulationUnit.class);
-        metricTypesToActivators.put(Type.EXECUNIT, ExecutionUnit.class);
-        metricTypesToActivators.put(Type.SOURCE_DIRECTORY, ProjectFile.class);
-        metricTypesToActivators.put(Type.SOURCE_FILE, ProjectFile.class);
-        metricTypesToActivators.put(Type.BUG, Bug.class);
-        metricTypesToActivators.put(Type.PROJECT_VERSION, ProjectVersion.class);
-        metricTypesToActivators.put(Type.MAILING_LIST, MailingList.class);
-        metricTypesToActivators.put(Type.MAILMESSAGE, MailMessage.class);
-        metricTypesToActivators.put(Type.MAILTHREAD, MailingListThread.class);
-	}
-
-	@Override
 	public void shutDown() {
 	}
 
-	@Override
-	public boolean startUp() {
-        core = AlitheiaCore.getInstance();
-
-        priority = new AtomicLong();
-        //Lower priorities are reserved for updater jobs
-        priority.set(0x1000);
-        
-        this.pa = core.getPluginAdmin();
-        this.db = core.getDBService();
-        this.sched = core.getScheduler();
-        
-        String sync = bc.getProperty("eu.sqooss.metricactivator.sync");
-        
-        if (sync != null && sync.equalsIgnoreCase("fast"))
-            this.fastSync = true;
-	
-        return true;
-	}
 }
 
 //vi: ai nosi sw=4 ts=4 expandtab

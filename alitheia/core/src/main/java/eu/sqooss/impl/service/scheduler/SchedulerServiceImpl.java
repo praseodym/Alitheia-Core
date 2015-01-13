@@ -44,20 +44,21 @@ import java.util.concurrent.PriorityBlockingQueue;
 
 import org.osgi.framework.BundleContext;
 
-import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.scheduler.Job;
 import eu.sqooss.service.scheduler.ResumePoint;
 import eu.sqooss.service.scheduler.Scheduler;
 import eu.sqooss.service.scheduler.SchedulerException;
 import eu.sqooss.service.scheduler.SchedulerStats;
 import eu.sqooss.service.scheduler.WorkerThread;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SchedulerServiceImpl implements Scheduler {
 
     private static final String START_THREADS_PROPERTY = "eu.sqooss.scheduler.numthreads";
     private static final String PERF_LOG_PROPERTY = "eu.sqooss.log.perf";
-    
-    private Logger logger = null;
+
+    private static final Logger logger = LoggerFactory.getLogger(SchedulerServiceImpl.class);
     private boolean perfLog = false;
 
     private SchedulerStats stats = new SchedulerStats();
@@ -72,7 +73,25 @@ public class SchedulerServiceImpl implements Scheduler {
 
     private List<WorkerThread> myWorkerThreads = null;
     
-    public SchedulerServiceImpl() { }
+    public SchedulerServiceImpl() {
+        int numThreads = 2 * Runtime.getRuntime().availableProcessors();
+        String threadsProperty = System.getProperty(START_THREADS_PROPERTY);
+
+        if (threadsProperty != null && !threadsProperty.equals("-1")) {
+            try {
+                numThreads = Integer.parseInt(threadsProperty);
+            } catch (NumberFormatException nfe) {
+                logger.warn("Invalid number of threads to start:" + threadsProperty);
+            }
+        }
+        startExecute(numThreads);
+
+        String perfLog = System.getProperty(PERF_LOG_PROPERTY);
+        if (perfLog != null && perfLog.equals("true")) {
+            logger.info("Using performance logging");
+            this.perfLog = true;
+        }
+    }
 
     public void enqueue(Job job) throws SchedulerException {
         synchronized (this) {
@@ -250,36 +269,7 @@ public class SchedulerServiceImpl implements Scheduler {
     }
 
 	@Override
-	public void setInitParams(BundleContext bc, Logger l) {
-		this.logger = l;
-	}
-
-	@Override
 	public void shutDown() {
-	}
-
-	@Override
-	public boolean startUp() {
-        
-        int numThreads = 2 * Runtime.getRuntime().availableProcessors(); 
-        String threadsProperty = System.getProperty(START_THREADS_PROPERTY);
-        
-        if (threadsProperty != null && !threadsProperty.equals("-1")) {
-            try {
-                numThreads = Integer.parseInt(threadsProperty);
-            } catch (NumberFormatException nfe) {
-                logger.warn("Invalid number of threads to start:" + threadsProperty);
-            }
-        }
-        startExecute(numThreads);
-        
-        String perfLog = System.getProperty(PERF_LOG_PROPERTY);
-        if (perfLog != null && perfLog.equals("true")) {
-            logger.info("Using performance logging");
-            this.perfLog = true;
-        }
-
-        return true;
 	}
 
     @Override

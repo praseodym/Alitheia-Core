@@ -7,9 +7,13 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import org.osgi.framework.BundleContext;
 
-import eu.sqooss.service.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class CacheServiceImpl implements CacheService {
 
@@ -24,10 +28,27 @@ public class CacheServiceImpl implements CacheService {
     }
   
     private CacheService c;
+    @Autowired
     private BundleContext bc;
-    private Logger log;
+    private static final Logger logger = LoggerFactory.getLogger(CacheServiceImpl.class);
     
-    public CacheServiceImpl() {}
+    public CacheServiceImpl() {
+        String impl = System.getProperty(CACHE_IMPL);
+
+        if (impl == null)
+            impl = "eu.sqooss.service.cache.OnDiskCache";
+
+        try {
+            Class clazz = Thread.currentThread().getContextClassLoader().loadClass(impl);
+            c = (CacheService) clazz.newInstance();
+        } catch (ClassNotFoundException e) {
+            logger.error("Cannot load cache implementation:" + impl);
+        } catch (InstantiationException e) {
+            logger.error("Cannot initialize cache implementation:" + impl + " Error:" + e.getMessage());
+        } catch (IllegalAccessException e) {
+            logger.error("Cannot initialize cache implementation:" + impl + " Error:" + e.getMessage());
+        }
+    }
     
     @Override
     public byte[] get(String key) {
@@ -65,38 +86,12 @@ public class CacheServiceImpl implements CacheService {
             set(key, buffer.toByteArray());
             
         } catch (IOException e) {
-            log.error("Error");
+            logger.error("Error");
         }
-    }
-
-    @Override
-    public boolean startUp() {
-        String impl = System.getProperty(CACHE_IMPL);
-        
-        if (impl == null)
-            impl = "eu.sqooss.service.cache.OnDiskCache";
-        
-        try {
-            Class clazz = Thread.currentThread().getContextClassLoader().loadClass(impl);
-            c = (CacheService) clazz.newInstance();
-        } catch (ClassNotFoundException e) {
-            log.error("Cannot load cache implementation:" + impl);
-        } catch (InstantiationException e) {
-            log.error("Cannot initialize cache implementation:" + impl + " Error:" + e.getMessage());
-        } catch (IllegalAccessException e) {
-            log.error("Cannot initialize cache implementation:" + impl + " Error:" + e.getMessage());
-        }
-        return true;
     }
 
     @Override
     public void shutDown() {
         c = null;
     }
-
-    @Override
-    public void setInitParams(BundleContext bc, Logger l) {
-       this.bc = bc;
-       this.log = l;
-    }   
 }
