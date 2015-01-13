@@ -39,6 +39,7 @@ import java.util.List;
 import eu.sqooss.core.AlitheiaCoreService;
 import eu.sqooss.service.abstractmetric.AlitheiaPlugin;
 import eu.sqooss.service.db.DAObject;
+import org.springframework.stereotype.Service;
 
 /**
  * <code>PluginAdmin</code> defines an interface for classes, that provide
@@ -48,6 +49,7 @@ import eu.sqooss.service.db.DAObject;
  * plug-in's information objects of type {@link PluginInfo}, describing the
  * available metric plug-ins, and indexed by a unique hash value.<br/>
  */
+@Service
 public interface PluginAdmin extends AlitheiaCoreService {
 
     /**

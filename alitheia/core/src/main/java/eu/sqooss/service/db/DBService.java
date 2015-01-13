@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.QueryException;
+import org.springframework.stereotype.Service;
 
 
 /**
@@ -80,6 +81,7 @@ import org.hibernate.QueryException;
  * @author Romain Pokrzywka
  *
  */
+@Service
 public interface DBService extends AlitheiaCoreService {
     
     /**
