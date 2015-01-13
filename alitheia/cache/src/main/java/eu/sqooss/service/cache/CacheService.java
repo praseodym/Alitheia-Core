@@ -3,6 +3,7 @@ package eu.sqooss.service.cache;
 import java.io.InputStream;
 
 import eu.sqooss.core.AlitheiaCoreService;
+import org.springframework.stereotype.Service;
 
 /**
  * A generic key value pair cache.
@@ -13,6 +14,7 @@ import eu.sqooss.core.AlitheiaCoreService;
  * @author Georgios Gousios <gousiosg@gmail.com>
  *
  */
+@Service
 public interface CacheService extends AlitheiaCoreService {
 
     /**

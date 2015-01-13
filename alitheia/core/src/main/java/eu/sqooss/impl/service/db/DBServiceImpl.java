@@ -67,6 +67,7 @@ import eu.sqooss.service.db.DAObject;
 import eu.sqooss.service.db.DBService;
 import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.util.URIUtills;
+import org.springframework.beans.factory.DisposableBean;
 
 /**
  * Implementation of the Database service, using Hibernate's Thread-based session handling
@@ -75,7 +76,7 @@ import eu.sqooss.service.util.URIUtills;
  * @author Romain Pokrzywka, Georgios Gousios
  * 
  */
-public class DBServiceImpl implements DBService, AlitheiaCoreService {
+public class DBServiceImpl implements DBService, AlitheiaCoreService, DisposableBean {
 
     private static DBService instance;
     
@@ -800,7 +801,7 @@ public class DBServiceImpl implements DBService, AlitheiaCoreService {
     }
 
     @Override
-    public void shutDown() {
+    public void destroy() {
     	logger.info("Shutting down database service");
     	sessionFactory.close();
     }

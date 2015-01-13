@@ -10,8 +10,9 @@ import java.util.List;
 import org.osgi.framework.BundleContext;
 
 import eu.sqooss.service.logging.Logger;
+import org.springframework.beans.factory.DisposableBean;
 
-public class CacheServiceImpl implements CacheService {
+public class CacheServiceImpl implements CacheService, DisposableBean {
 
     public static final String CACHE_IMPL = "eu.sqooss.service.cache.OnDiskCache";
     
@@ -90,7 +91,7 @@ public class CacheServiceImpl implements CacheService {
     }
 
     @Override
-    public void shutDown() {
+    public void destroy() {
         c = null;
     }
 
@@ -98,5 +99,5 @@ public class CacheServiceImpl implements CacheService {
     public void setInitParams(BundleContext bc, Logger l) {
        this.bc = bc;
        this.log = l;
-    }   
+    }
 }

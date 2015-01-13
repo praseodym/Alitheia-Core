@@ -390,9 +390,6 @@ public class ClusterNodeServiceImpl extends HttpServlet implements ClusterNodeSe
 	}
 
 	@Override
-	public void shutDown() {}
-
-	@Override
 	public boolean startUp() {
 		
 		/* Get a reference to the core service*/

@@ -34,7 +34,9 @@
 package eu.sqooss.service.webadmin;
 
 import eu.sqooss.core.AlitheiaCoreService;
+import org.springframework.stereotype.Service;
 
+@Service
 public interface WebadminService extends AlitheiaCoreService {
     public String getMessageOfTheDay();
     public void setMessageOfTheDay(String s);

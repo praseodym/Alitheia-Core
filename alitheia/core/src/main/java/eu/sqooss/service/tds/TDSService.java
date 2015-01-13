@@ -35,6 +35,7 @@ package eu.sqooss.service.tds;
 
 import eu.sqooss.core.AlitheiaCoreService;
 import eu.sqooss.service.tds.DataAccessor;
+import org.springframework.stereotype.Service;
 
 /**
  * The TDS service interface provides a way to retrieve and configure project
@@ -77,7 +78,7 @@ import eu.sqooss.service.tds.DataAccessor;
  * 
  * @see ProjectAccessor
  */
-
+@Service
 public interface TDSService extends AlitheiaCoreService {
     /**
      * Check that the given project exists in the TDS.

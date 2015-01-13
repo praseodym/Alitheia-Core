@@ -52,11 +52,6 @@ public interface AlitheiaCoreService {
 	public boolean startUp();
 	
 	/**
-	 * Tell an internal service to shutdown.
-	 */
-	public void shutDown();
-	
-	/**
 	 * Create and return a new service instance. This method should create
 	 * intances of a service even if the service class has not been initialised
 	 * so it should be implemented as a static method.

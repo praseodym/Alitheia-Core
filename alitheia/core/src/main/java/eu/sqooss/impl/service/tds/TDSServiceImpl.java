@@ -159,11 +159,6 @@ public class TDSServiceImpl implements TDSService, AlitheiaCoreService {
     }
 
 	@Override
-	public void shutDown() {
-		
-	}
-
-	@Override
 	public boolean startUp() {
         ProjectDataAccessorImpl.logger = logger;
 

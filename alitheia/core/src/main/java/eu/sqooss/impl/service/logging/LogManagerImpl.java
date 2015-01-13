@@ -119,11 +119,6 @@ public class LogManagerImpl implements LogManager {
 	}
 
 	@Override
-	public void shutDown() {
-	    
-	}
-
-	@Override
 	public boolean startUp() {
 	    loggers = new HashMap<String, LoggerImpl>();
 		// The configuration is read automatically from the file log4j.properties

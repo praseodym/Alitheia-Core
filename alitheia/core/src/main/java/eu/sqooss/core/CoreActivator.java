@@ -37,30 +37,29 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 
 public class CoreActivator implements BundleActivator {
 
-    /** Keeps the <code>AlitheaCore</code> instance. */
-    private AlitheiaCore core;
-    
     /** Keeps the <code>AlitheaCore</code>'s service registration instance. */
     private ServiceRegistration sregCore;
+    private ConfigurableApplicationContext context;
 
     public void start(BundleContext bc) throws Exception {
-        ApplicationContext context = new AnnotationConfigApplicationContext(SpringApplication.class);
+        context = new AnnotationConfigApplicationContext(SpringApplication.class);
         context.getBean(SpringApplication.BundleContextHolder.class).setBundleContext(bc);
-        core = context.getBean(AlitheiaCore.class);
+        /* Keeps the <code>AlitheaCore</code> instance. */
+        AlitheiaCore core = context.getBean(AlitheiaCore.class);
         sregCore = bc.registerService(AlitheiaCore.class.getName(), core, null);
     }
   
     public void stop(BundleContext bc) throws Exception {
-    	core.shutDown();
+        context.close();
     	if (sregCore != null) {
     		sregCore.unregister();
     	}
-    	core = null;
     }
 }
 

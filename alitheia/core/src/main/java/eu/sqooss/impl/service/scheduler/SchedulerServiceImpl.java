@@ -255,10 +255,6 @@ public class SchedulerServiceImpl implements Scheduler {
 	}
 
 	@Override
-	public void shutDown() {
-	}
-
-	@Override
 	public boolean startUp() {
         
         int numThreads = 2 * Runtime.getRuntime().availableProcessors(); 

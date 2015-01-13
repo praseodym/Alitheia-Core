@@ -205,12 +205,6 @@ public class UpdaterServiceImpl implements UpdaterService, JobStateListener {
         return false;
     }
     
-    /* AlitheiaCoreService interface methods*/
-    @Override
-    public void shutDown() {
-        
-    }
-
     @Override
     public boolean startUp() {
         core = AlitheiaCore.getInstance();

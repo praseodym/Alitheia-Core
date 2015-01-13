@@ -35,6 +35,7 @@ import java.util.Set;
 import eu.sqooss.core.AlitheiaCoreService;
 import eu.sqooss.service.db.StoredProject;
 import eu.sqooss.service.tds.TDSService;
+import org.springframework.stereotype.Service;
 
 /**
  * The updater service is the gateway in Alitheia core to tell the system that
@@ -61,6 +62,7 @@ import eu.sqooss.service.tds.TDSService;
  * {@link TDSService}.
  * 
  */
+@Service
 public interface UpdaterService extends AlitheiaCoreService {
 
     /**

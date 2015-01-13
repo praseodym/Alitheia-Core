@@ -34,6 +34,7 @@
 package eu.sqooss.service.logging;
 
 import eu.sqooss.core.AlitheiaCoreService;
+import org.springframework.stereotype.Service;
 
 /**
  * The <code>LogManager</code> creates and releases the loggers. When the
@@ -45,6 +46,7 @@ import eu.sqooss.core.AlitheiaCoreService;
  *  and 7 for a list of which names are valid. Or look at LogManagerConstants,
  *  which is part of the implementation.
  */
+@Service
 public interface LogManager extends AlitheiaCoreService {
     /**
     * Creates a new logger if doesn't exist, otherwise returns a existent logger.

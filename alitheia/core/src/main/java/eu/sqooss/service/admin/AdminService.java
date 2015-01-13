@@ -33,6 +33,7 @@ package eu.sqooss.service.admin;
 import java.util.Set;
 
 import eu.sqooss.core.AlitheiaCoreService;
+import org.springframework.stereotype.Service;
 
 /**
  * A service that contains and executes administrative actions on behalf of
@@ -41,6 +42,7 @@ import eu.sqooss.core.AlitheiaCoreService;
  * @author Georgios Gousios <gousiosg@gmail.com>
  * 
  */
+@Service
 public interface AdminService extends AlitheiaCoreService {
     
     /**

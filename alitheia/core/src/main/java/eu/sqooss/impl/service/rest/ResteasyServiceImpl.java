@@ -38,8 +38,9 @@ import org.osgi.service.http.HttpService;
 
 import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.rest.RestService;
+import org.springframework.beans.factory.DisposableBean;
 
-public class ResteasyServiceImpl implements RestService {
+public class ResteasyServiceImpl implements RestService, DisposableBean {
 
 	private BundleContext bc;
     private Logger log ;
@@ -100,7 +101,7 @@ public class ResteasyServiceImpl implements RestService {
     }
 
     @Override
-    public void shutDown() {
+    public void destroy() {
         unregisterApp();
     }
 

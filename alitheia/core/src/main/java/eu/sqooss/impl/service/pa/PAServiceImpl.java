@@ -715,11 +715,6 @@ public class PAServiceImpl implements PluginAdmin, ServiceListener {
 	}
 
 	@Override
-	public void shutDown() {
-		return ;
-	}
-
-	@Override
 	public void setInitParams(BundleContext bc, Logger l) {
 	    this.bc = bc;
         this.logger = l;

@@ -282,10 +282,6 @@ public class AdminServiceImpl extends Thread implements AdminService {
 	}
 
 	@Override
-	public void shutDown() {
-	}
-
-	@Override
 	public void setInitParams(BundleContext bc, Logger l) {
 		log = l;
 	}

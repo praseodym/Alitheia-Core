@@ -414,10 +414,6 @@ public class MetricActivatorImpl  implements MetricActivator {
 	}
 
 	@Override
-	public void shutDown() {
-	}
-
-	@Override
 	public boolean startUp() {
         core = AlitheiaCore.getInstance();
 

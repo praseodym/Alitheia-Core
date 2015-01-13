@@ -67,9 +67,10 @@ import eu.sqooss.service.tds.ProjectAccessor;
 import eu.sqooss.service.tds.Revision;
 import eu.sqooss.service.tds.SCMAccessor;
 import eu.sqooss.service.tds.TDSService;
+import org.springframework.beans.factory.DisposableBean;
 
 /** {@inheritDoc} */
-public class FDSServiceImpl implements FDSService, Runnable {
+public class FDSServiceImpl implements FDSService, Runnable, DisposableBean {
     /** The logger for the FDS. */
     private Logger logger = null;
     /** We use the TDS for raw data access. */
@@ -676,7 +677,7 @@ public class FDSServiceImpl implements FDSService, Runnable {
     }
 
     @Override
-    public void shutDown() {
+    public void destroy() {
         String s = bc.getProperty("eu.sqooss.fds.cleanupOnExit");
 
         if (s != null && s.equals("true")) {

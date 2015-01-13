@@ -120,10 +120,6 @@ public class WebadminServiceImpl implements WebadminService {
 	}
 
 	@Override
-	public void shutDown() {
-	}
-
-	@Override
 	public boolean startUp() {        
         // Get a reference to the HTTPService, and then its object
         HttpService sobjHTTPService = null;

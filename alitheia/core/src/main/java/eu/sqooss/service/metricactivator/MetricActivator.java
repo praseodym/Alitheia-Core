@@ -37,11 +37,13 @@ import eu.sqooss.core.AlitheiaCoreService;
 import eu.sqooss.service.abstractmetric.AlitheiaPlugin;
 import eu.sqooss.service.db.DAObject;
 import eu.sqooss.service.db.StoredProject;
+import org.springframework.stereotype.Service;
 
 /**
  * The MetricActivator service is responsible for kickstarting metric jobs
  * either after project metadata updates or
  */
+@Service
 public interface MetricActivator extends AlitheiaCoreService {
 
 	/**
