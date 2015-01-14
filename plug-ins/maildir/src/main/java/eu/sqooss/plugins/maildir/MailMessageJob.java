@@ -46,10 +46,10 @@ import eu.sqooss.service.db.Developer;
 import eu.sqooss.service.db.MailMessage;
 import eu.sqooss.service.db.MailingList;
 import eu.sqooss.service.db.StoredProject;
-import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.scheduler.Job;
 import eu.sqooss.service.tds.MailAccessor;
 import eu.sqooss.service.tds.ProjectAccessor;
+import org.slf4j.Logger;
 
 public class MailMessageJob extends Job{
 

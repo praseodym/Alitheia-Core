@@ -52,7 +52,6 @@ import eu.sqooss.service.db.ProjectVersion;
 import eu.sqooss.service.db.ProjectVersionParent;
 import eu.sqooss.service.db.StoredProject;
 import eu.sqooss.service.db.Tag;
-import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.tds.AccessorException;
 import eu.sqooss.service.tds.CommitCopyEntry;
 import eu.sqooss.service.tds.CommitLog;
@@ -67,6 +66,7 @@ import eu.sqooss.service.updater.Updater;
 import eu.sqooss.service.updater.UpdaterService.UpdaterStage;
 import eu.sqooss.service.util.FileUtils;
 import eu.sqooss.service.util.Pair;
+import org.slf4j.Logger;
 
 /**
  * A metadata updater converts raw data to Alitheia Core database metadata.

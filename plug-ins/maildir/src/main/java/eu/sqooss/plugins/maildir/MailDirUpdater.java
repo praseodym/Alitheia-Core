@@ -49,7 +49,6 @@ import eu.sqooss.service.db.DAObject;
 import eu.sqooss.service.db.DBService;
 import eu.sqooss.service.db.MailingList;
 import eu.sqooss.service.db.StoredProject;
-import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.scheduler.Job;
 import eu.sqooss.service.scheduler.SchedulerException;
 import eu.sqooss.service.tds.MailAccessor;
@@ -57,6 +56,7 @@ import eu.sqooss.service.tds.ProjectAccessor;
 import eu.sqooss.service.updater.MetadataUpdater;
 import eu.sqooss.service.updater.Updater;
 import eu.sqooss.service.updater.UpdaterService.UpdaterStage;
+import org.slf4j.Logger;
 
 /**
  * Synchronises raw mails with the database.

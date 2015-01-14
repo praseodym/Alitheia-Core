@@ -53,7 +53,6 @@ import eu.sqooss.service.db.ProjectVersionParent;
 import eu.sqooss.service.db.StoredProject;
 import eu.sqooss.service.db.ConfigOption;
 import eu.sqooss.service.db.Tag;
-import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.tds.CommitCopyEntry;
 import eu.sqooss.service.tds.CommitLog;
 import eu.sqooss.service.tds.InvalidProjectRevisionException;
@@ -68,6 +67,7 @@ import eu.sqooss.service.updater.MetadataUpdater;
 import eu.sqooss.service.updater.Updater;
 import eu.sqooss.service.updater.UpdaterService.UpdaterStage;
 import eu.sqooss.service.util.FileUtils;
+import org.slf4j.Logger;
 
 /**
  * Update SVN metadata by synchronizing the latest version available to

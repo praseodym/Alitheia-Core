@@ -51,11 +51,11 @@ import eu.sqooss.service.db.BugPriority.Priority;
 import eu.sqooss.service.db.BugResolution.Resolution;
 import eu.sqooss.service.db.BugSeverity.Severity;
 import eu.sqooss.service.db.BugStatus.Status;
-import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.scheduler.Job;
 import eu.sqooss.service.tds.BTSAccessor;
 import eu.sqooss.service.tds.BTSEntry;
 import eu.sqooss.service.tds.BTSEntry.BTSEntryComment;
+import org.slf4j.Logger;
 
 public class BugzillaXMLJob extends Job {
 

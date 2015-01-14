@@ -36,12 +36,12 @@ import eu.sqooss.service.db.ProjectFileState;
 import eu.sqooss.service.db.ProjectVersion;
 import eu.sqooss.service.db.StoredProject;
 import eu.sqooss.service.logging.LogManager;
-import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.tds.AccessorException;
 import eu.sqooss.service.tds.CommitLog;
 import eu.sqooss.service.tds.InvalidProjectRevisionException;
 import eu.sqooss.service.tds.InvalidRepositoryException;
 import eu.sqooss.service.tds.Revision;
+import org.slf4j.Logger;
 
 public class TestGitUpdater extends TestGitSetup {
 
@@ -94,7 +94,7 @@ public class TestGitUpdater extends TestGitSetup {
         }
         
         LogManager lm = new LogManagerImpl(true);
-        l = lm.createLogger("sqooss.updater");
+//        l = lm.createLogger("sqooss.updater");
         
         AlitheiaCore.testInstance();
         
