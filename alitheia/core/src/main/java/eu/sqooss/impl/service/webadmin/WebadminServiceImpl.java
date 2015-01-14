@@ -85,7 +85,6 @@ public class WebadminServiceImpl implements WebadminService {
         }
         else {
             logger.error("Could not find a HTTP service!");
-            return false;
         }
 
         initVelocity();
@@ -132,7 +131,7 @@ public class WebadminServiceImpl implements WebadminService {
             ve.setProperty("runtime.log.logsystem.class",
                            "org.apache.velocity.runtime.log.SimpleLog4JLogSystem");
             ve.setProperty("runtime.log.logsystem.log4j.category",
-                           Logger.NAME_SQOOSS_WEBADMIN);
+                           "Logger.NAME_SQOOSS_WEBADMIN");
             String resourceLoader = "classpath";
             ve.setProperty(RuntimeConstants.RESOURCE_LOADER, resourceLoader);
             ve.setProperty(resourceLoader + "." + RuntimeConstants.RESOURCE_LOADER + ".class",
@@ -142,12 +141,6 @@ public class WebadminServiceImpl implements WebadminService {
             logger.error("Velocity initialization",e);
         }
     }
-
-	@Override
-	public void setInitParams(BundleContext bc, Logger l) {
-		this.logger = l;
-		this.bc = bc;
-	}
 }
 
 

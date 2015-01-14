@@ -31,7 +31,8 @@
 package eu.sqooss.service.updater;
 
 import eu.sqooss.service.db.StoredProject;
-import eu.sqooss.service.logging.Logger;
+import org.slf4j.Logger;
+
 
 /**
  * Interface that all jobs managed by the updater service must implement.

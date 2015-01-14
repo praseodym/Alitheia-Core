@@ -311,7 +311,6 @@ public class DBServiceImpl implements DBService, AlitheiaCoreService, Disposable
     
     public DBServiceImpl(Properties p, URL configFileURL, Logger l) { 
         this.conProp = p;
-        this.logger = l;
         initHibernate(configFileURL);
         isInitialised.compareAndSet(false, true);
         instance = this;

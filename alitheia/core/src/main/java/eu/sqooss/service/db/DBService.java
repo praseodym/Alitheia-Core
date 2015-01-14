@@ -34,8 +34,8 @@
 package eu.sqooss.service.db;
 
 import eu.sqooss.core.AlitheiaCoreService;
-import eu.sqooss.service.logging.Logger;
 import org.hibernate.QueryException;
+import org.slf4j.Logger;
 
 import java.sql.SQLException;
 import java.util.Collection;
