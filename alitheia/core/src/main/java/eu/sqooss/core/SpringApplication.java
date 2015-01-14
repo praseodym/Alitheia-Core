@@ -123,6 +123,6 @@ public class SpringApplication {
 
     @Bean
     WebadminService webadminService() {
-        return new WebadminServiceImpl(bundleContext());
+        return new WebadminServiceImpl(bundleContext(), dbService());
     }
 }

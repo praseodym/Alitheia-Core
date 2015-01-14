@@ -97,14 +97,15 @@ public class AdminServlet extends HttpServlet {
     public AdminServlet(BundleContext bc,
             WebadminService webadmin,
             Logger logger,
-            VelocityEngine ve) {
+            VelocityEngine ve,
+            DBService db) {
         AdminServlet.webadmin = webadmin;
         AdminServlet.bc = bc;
         this.ve = ve;
         this.logger = logger;
         
         AlitheiaCore core = AlitheiaCore.getInstance();
-        db = core.getDBService();
+        this.db = db;
         
         // Create the static content map
         staticContentMap = new Hashtable<String, Pair<String, String>>();
