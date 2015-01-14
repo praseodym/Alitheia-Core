@@ -118,7 +118,7 @@ public class SpringApplication {
 
     @Bean
     UpdaterService updaterService() {
-        return new UpdaterServiceImpl(bundleContext(), dbService(), clusterNodeService());
+        return new UpdaterServiceImpl(bundleContext(), dbService());
     }
 
     @Bean
