@@ -34,16 +34,13 @@
 package eu.sqooss.service.db;
 
 import eu.sqooss.core.AlitheiaCoreService;
-import eu.sqooss.service.db.DAObject;
 import eu.sqooss.service.logging.Logger;
+import org.hibernate.QueryException;
 
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
-import org.hibernate.QueryException;
-import org.springframework.stereotype.Service;
 
 
 /**
@@ -81,7 +78,6 @@ import org.springframework.stereotype.Service;
  * @author Romain Pokrzywka
  *
  */
-@Service
 public interface DBService extends AlitheiaCoreService {
     
     /**

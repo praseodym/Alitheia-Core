@@ -30,7 +30,6 @@
 package eu.sqooss.service.rest;
 
 import eu.sqooss.core.AlitheiaCoreService;
-import org.springframework.stereotype.Service;
 
 /**
  * Alitheia Core REST API service. Allows custom paths to be registered under 
@@ -39,7 +38,6 @@ import org.springframework.stereotype.Service;
  * @author Georgios Gousios <gousiosg@gmail.com>
  *
  */
-@Service
 public interface RestService extends AlitheiaCoreService {
 	
 	/**

@@ -33,19 +33,17 @@
 
 package eu.sqooss.service.scheduler;
 
+import eu.sqooss.core.AlitheiaCoreService;
+
 import java.util.Deque;
 import java.util.List;
 import java.util.Set;
-
-import eu.sqooss.core.AlitheiaCoreService;
-import org.springframework.stereotype.Service;
 
 /**
  * Interface for the scheduler.
  *
  * @author Mirko Boehm
  */
-@Service
 public interface Scheduler extends AlitheiaCoreService {
 
     /**

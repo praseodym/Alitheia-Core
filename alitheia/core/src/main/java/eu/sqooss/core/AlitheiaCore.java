@@ -33,11 +33,6 @@
 
 package eu.sqooss.core;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import eu.sqooss.impl.service.db.DBServiceImpl;
 import eu.sqooss.service.admin.AdminService;
 import eu.sqooss.service.cluster.ClusterNodeService;
 import eu.sqooss.service.db.DBService;
@@ -51,7 +46,8 @@ import eu.sqooss.service.tds.TDSService;
 import eu.sqooss.service.updater.UpdaterService;
 import eu.sqooss.service.webadmin.WebadminService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * Startup class of the Alitheia framework's core. Its main goal is to
@@ -60,7 +56,6 @@ import org.springframework.stereotype.Component;
  * through getInstance(); after that you can use the get*Service() methods
  * to get each of the other core components as needed.
  */
-@Component
 public class AlitheiaCore {
 
     /** The Core is singleton-line because it has a special instance */

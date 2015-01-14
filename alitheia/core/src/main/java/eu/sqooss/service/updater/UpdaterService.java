@@ -29,13 +29,11 @@
  */
 package eu.sqooss.service.updater;
 
-import java.util.List;
-import java.util.Set;
-
 import eu.sqooss.core.AlitheiaCoreService;
 import eu.sqooss.service.db.StoredProject;
 import eu.sqooss.service.tds.TDSService;
-import org.springframework.stereotype.Service;
+
+import java.util.Set;
 
 /**
  * The updater service is the gateway in Alitheia core to tell the system that
@@ -62,7 +60,6 @@ import org.springframework.stereotype.Service;
  * {@link TDSService}.
  * 
  */
-@Service
 public interface UpdaterService extends AlitheiaCoreService {
 
     /**

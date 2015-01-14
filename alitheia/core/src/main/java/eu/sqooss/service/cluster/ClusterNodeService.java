@@ -35,9 +35,8 @@ package eu.sqooss.service.cluster;
 
 
 import eu.sqooss.core.AlitheiaCoreService;
-import eu.sqooss.service.db.StoredProject;
 import eu.sqooss.service.db.ClusterNode;
-import org.springframework.stereotype.Service;
+import eu.sqooss.service.db.StoredProject;
 
 /**
  * The clusternode service is the gateway in Alitheia to control the clusternode
@@ -60,7 +59,6 @@ import org.springframework.stereotype.Service;
  * of the system to call the clusternode, as it is intended as a way to poke
  * the system from the outside.
  */
-@Service
 public interface ClusterNodeService extends AlitheiaCoreService {
 
     /**
