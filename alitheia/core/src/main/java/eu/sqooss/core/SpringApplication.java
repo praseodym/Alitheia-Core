@@ -73,37 +73,37 @@ public class SpringApplication {
 
     @Bean
     ClusterNodeService clusterNodeService() {
-        return new ClusterNodeServiceImpl();
+        return new ClusterNodeServiceImpl(bundleContext(), dbService(), updaterService());
     }
 
     @Bean
     DBService dbService() {
-        return new DBServiceImpl();
+        return new DBServiceImpl(bundleContext());
     }
 
     @Bean
     FDSService fdsService() {
-        return new FDSServiceImpl();
+        return new FDSServiceImpl(bundleContext(), tdsService());
     }
 
     @Bean
     LogManager logManager() {
-        return new LogManagerImpl();
+        return new LogManagerImpl(bundleContext());
     }
 
     @Bean
     MetricActivator metricActivator() {
-        return new MetricActivatorImpl();
+        return new MetricActivatorImpl(bundleContext(), pluginAdmin(), dbService(), scheduler());
     }
 
     @Bean
     PluginAdmin pluginAdmin() {
-        return new PAServiceImpl();
+        return new PAServiceImpl(bundleContext(), dbService());
     }
 
     @Bean
     RestService restService() {
-        return new ResteasyServiceImpl();
+        return new ResteasyServiceImpl(bundleContext());
     }
 
     @Bean
@@ -118,11 +118,11 @@ public class SpringApplication {
 
     @Bean
     UpdaterService updaterService() {
-        return new UpdaterServiceImpl();
+        return new UpdaterServiceImpl(bundleContext(), dbService(), clusterNodeService());
     }
 
     @Bean
     WebadminService webadminService() {
-        return new WebadminServiceImpl();
+        return new WebadminServiceImpl(bundleContext());
     }
 }

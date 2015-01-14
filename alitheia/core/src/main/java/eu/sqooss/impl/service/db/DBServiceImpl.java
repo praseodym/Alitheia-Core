@@ -125,7 +125,6 @@ public class DBServiceImpl implements DBService, AlitheiaCoreService, Disposable
 
     private static final Logger logger = LoggerFactory.getLogger(DBServiceImpl.class);
     private SessionFactory sessionFactory = null;
-    @Autowired
     private BundleContext bc = null;
     private AtomicBoolean isInitialised = new AtomicBoolean(false);
     private Properties conProp = new Properties();
@@ -287,7 +286,8 @@ public class DBServiceImpl implements DBService, AlitheiaCoreService, Disposable
         return true;
     }
     
-    public DBServiceImpl() {
+    public DBServiceImpl(BundleContext context) {
+        bc = context;
         String db  = bc.getProperty(DB).toLowerCase();
         String cs = connString.get(db);
         cs = cs.replaceAll("<HOST>", bc.getProperty(DB_HOST));
@@ -314,12 +314,6 @@ public class DBServiceImpl implements DBService, AlitheiaCoreService, Disposable
         initHibernate(configFileURL);
         isInitialised.compareAndSet(false, true);
         instance = this;
-    }
-    
-    public static DBService getInstance() {
-        if (instance == null)
-            instance = new DBServiceImpl();
-        return instance;
     }
 
     public <T extends DAObject> T findObjectById(Class<T> daoClass, long id) {

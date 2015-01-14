@@ -70,12 +70,9 @@ import eu.sqooss.service.scheduler.SchedulerException;
 import eu.sqooss.service.util.GraphTS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class MetricActivatorImpl  implements MetricActivator {
 
-    /** The parent bundle's context object. */
-    @Autowired
     private BundleContext bc;
 
     private AlitheiaCore core;
@@ -89,7 +86,12 @@ public class MetricActivatorImpl  implements MetricActivator {
     
     private HashMap<MetricType.Type, Class<? extends DAObject>> metricTypesToActivators;
     
-    public MetricActivatorImpl() {
+    public MetricActivatorImpl(BundleContext bc, PluginAdmin pa, DBService db, Scheduler sched) {
+        this.bc = bc;
+        this.pa = pa;
+        this.db = db;
+        this.sched = sched;
+
         metricTypesToActivators = new HashMap<Type, Class<? extends DAObject>>();
         metricTypesToActivators.put(Type.NAMESPACE, NameSpace.class);
         metricTypesToActivators.put(Type.ENCAPSUNIT, EncapsulationUnit.class);
@@ -102,15 +104,9 @@ public class MetricActivatorImpl  implements MetricActivator {
         metricTypesToActivators.put(Type.MAILMESSAGE, MailMessage.class);
         metricTypesToActivators.put(Type.MAILTHREAD, MailingListThread.class);
 
-        core = AlitheiaCore.getInstance();
-
         priority = new AtomicLong();
         //Lower priorities are reserved for updater jobs
         priority.set(0x1000);
-
-        this.pa = core.getPluginAdmin();
-        this.db = core.getDBService();
-        this.sched = core.getScheduler();
 
         String sync = bc.getProperty("eu.sqooss.metricactivator.sync");
 

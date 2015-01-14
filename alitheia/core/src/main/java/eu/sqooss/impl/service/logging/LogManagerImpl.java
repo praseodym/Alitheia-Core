@@ -53,7 +53,6 @@ public class LogManagerImpl implements LogManager {
     public static LogManagerImpl logManager = null;
 
     // Our OSGi context; used to indicate initialization status.
-    @Autowired
     private BundleContext bc;
 
     // This map stores all of the valid and active loggers in the system.
@@ -61,7 +60,8 @@ public class LogManagerImpl implements LogManager {
 
     private CyclicLogger cyclicLogger = null;
 
-    public LogManagerImpl() {
+    public LogManagerImpl(BundleContext bc) {
+        this.bc = bc;
         loggers = new HashMap<String, LoggerImpl>();
         // The configuration is read automatically from the file log4j.properties
         // in the bundle .jar ; this is much like calling:
@@ -96,7 +96,7 @@ public class LogManagerImpl implements LogManager {
     }
 
     public LogManagerImpl(boolean testInit) {
-        logManager = new LogManagerImpl();
+        logManager = new LogManagerImpl(null);
         loggers = new HashMap<String, LoggerImpl>();
     }
     

@@ -59,7 +59,6 @@ import eu.sqooss.service.db.StoredProject;
 import eu.sqooss.service.updater.UpdaterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author George M. Zouganelis
@@ -85,21 +84,20 @@ public class ClusterNodeServiceImpl extends HttpServlet implements ClusterNodeSe
     private static final Logger logger = LoggerFactory.getLogger(ClusterNodeServiceImpl.class);
     private AlitheiaCore core = null;
     private HttpService httpService = null;
-    @Autowired
     private BundleContext context;
     private DBService dbs = null;
     private UpdaterService upds = null;
     
     private ClusterNode thisNode = null;
 
-    public ClusterNodeServiceImpl() {
-
+    public ClusterNodeServiceImpl(BundleContext bc, DBService dbs, UpdaterService upds) {
+        context = bc;
 		/* Get a reference to the core service*/
         ServiceReference serviceRef = null;
 
         core = AlitheiaCore.getInstance();
-        dbs = core.getDBService();
-        upds = core.getUpdater();
+        this.dbs = dbs;
+        this.upds = upds;
 
         logger.info("Got a valid reference to the logger");
 

@@ -60,7 +60,7 @@ public class AlitheiaCore {
 
     /** The Core is singleton-line because it has a special instance */
     private static AlitheiaCore instance = null;
-    
+
     /* Service Configuration */
     @Autowired
     RestService restService;

@@ -100,7 +100,6 @@ public class FDSServiceImpl implements FDSService, Runnable, DisposableBean {
      */
     private ConcurrentHashMap<OnDiskCheckout, Integer> checkoutHandles;
 
-    @Autowired
     private BundleContext bc;
     
     /*
@@ -122,8 +121,9 @@ public class FDSServiceImpl implements FDSService, Runnable, DisposableBean {
      */
     private static final int INT_AS_HEX_LENGTH = 8;
 
-    public FDSServiceImpl() {
-        tds = AlitheiaCore.getInstance().getTDSService();
+    public FDSServiceImpl(BundleContext bc, TDSService tds) {
+        this.bc = bc;
+        this.tds = tds;
         logger.info("Got TDS service for FDS.");
 
         checkoutCache = new ConcurrentHashMap<String, OnDiskCheckout>();

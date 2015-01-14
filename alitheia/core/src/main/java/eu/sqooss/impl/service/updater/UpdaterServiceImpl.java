@@ -76,9 +76,8 @@ public class UpdaterServiceImpl implements UpdaterService, JobStateListener {
     private static final Logger logger = LoggerFactory.getLogger(UpdaterServiceImpl.class);
     private AlitheiaCore core = null;
 
-    @Autowired
     private BundleContext context;
-    private DBService dbs = null;
+    private DBService dbs;
     
     /* Maps project-ids to the jobs that have been scheduled for 
      * each update target*/
@@ -86,16 +85,12 @@ public class UpdaterServiceImpl implements UpdaterService, JobStateListener {
     
     /* List of registered updaters */
     private BidiMap<Updater, Class<? extends MetadataUpdater>> updaters;
+    private ClusterNodeService cns;
 
-    public UpdaterServiceImpl() {
-        core = AlitheiaCore.getInstance();
-        if (logger != null) {
-            logger.info("Got a valid reference to the logger");
-        } else {
-            System.out.println("ERROR: Updater got no logger");
-        }
-
-        dbs = core.getDBService();
+    public UpdaterServiceImpl(BundleContext bc, DBService dbs, ClusterNodeService cns) {
+        this.context = bc;
+        this.dbs = dbs;
+        this.cns = cns;
 
         updaters = new BidiMap<Updater, Class<? extends MetadataUpdater>>();
         scheduledUpdates = new ConcurrentHashMap<Long, Map<Updater, UpdaterJob>>();
@@ -288,37 +283,27 @@ public class UpdaterServiceImpl implements UpdaterService, JobStateListener {
      */
     private boolean update(StoredProject project, UpdaterStage stage, Updater updater) {
         
-        ClusterNodeService cns = null;
-        
         if (project == null) {
             logger.info("Bad project name for update.");
             return false;
         }     
         
-         /// ClusterNode Checks - Clone to MetricActivatorImpl
-        cns = core.getClusterNodeService();
-        if (cns==null) {
-            logger.warn("ClusterNodeService reference not found " +
-            		"- ClusterNode assignment checks will be ignored");
-        } else {            
-           
-            ClusterNode node = project.getClusternode();
+        ClusterNode node = project.getClusternode();
             
-            if (node == null) {
-                logger.warn("Project " + project + 
-                        " not assigned to any cluster node");
-            } else { 
-                // project is assigned , check if it is assigned to this Node
-                if (!cns.isProjectAssigned(project)) {
-                    logger.warn("Project " + project.getName() + 
-                            " is not assigned to this ClusterNode - Ignoring update");
-                    // TODO: Clustering - further implementation:
-                    // If needed, forward Update to the appropriate ClusterNode!
-                    return true;   
-                }                
+        if (node == null) {
+            logger.warn("Project " + project +
+                    " not assigned to any cluster node");
+        } else {
+            // project is assigned , check if it is assigned to this Node
+            if (!cns.isProjectAssigned(project)) {
+                logger.warn("Project " + project.getName() +
+                        " is not assigned to this ClusterNode - Ignoring update");
+                // TODO: Clustering - further implementation:
+                // If needed, forward Update to the appropriate ClusterNode!
+                return true;
             }
-        }  
-       
+        }
+
         logger.info("Request to update project:" + project.getName()  
                 + " stage:" + (stage == null?stage:"all") 
                 + " updater:" + (updater == null?updater:"all"));

@@ -43,11 +43,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ResteasyServiceImpl implements RestService, DisposableBean {
-	@Autowired
 	private BundleContext bc;
 	private static final Logger logger = LoggerFactory.getLogger(ResteasyServiceImpl.class);
 
-	public ResteasyServiceImpl() {
+	public ResteasyServiceImpl(BundleContext bc) {
+		this.bc = bc;
 		addResource(eu.sqooss.rest.api.StoredProjectResource.class);
 		addResource(eu.sqooss.rest.api.MetricsResource.class);
 	}

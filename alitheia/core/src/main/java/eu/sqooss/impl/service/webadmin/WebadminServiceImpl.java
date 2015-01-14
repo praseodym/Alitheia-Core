@@ -74,7 +74,8 @@ public class WebadminServiceImpl implements WebadminService {
 
     private BundleContext bc;
 
-    public WebadminServiceImpl() {
+    public WebadminServiceImpl(BundleContext bc) {
+        this.bc = bc;
         // Get a reference to the HTTPService, and then its object
         HttpService sobjHTTPService = null;
         ServiceReference srefHTTPService = bc.getServiceReference(

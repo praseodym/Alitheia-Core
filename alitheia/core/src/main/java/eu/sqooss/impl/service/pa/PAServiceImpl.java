@@ -41,12 +41,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.*;
 
 import eu.sqooss.core.AlitheiaCore;
 import eu.sqooss.service.abstractmetric.AlitheiaPlugin;
@@ -102,30 +97,21 @@ public class PAServiceImpl implements PluginAdmin, ServiceListener {
     private ConcurrentHashMap<String, PluginInfo> registeredPlugins =
         new ConcurrentHashMap<String, PluginInfo>();
 
-    public PAServiceImpl () {
+    public PAServiceImpl (BundleContext bc, DBService db) {
         logger.info("Starting the PluginAdmin component.");
 
         // Get the AlitheiaCore's object
-        sobjCore = AlitheiaCore.getInstance();
 
-        if (sobjCore != null) {
-            // Obtain the required core components
-            sobjDB = sobjCore.getDBService();
-            if (sobjDB == null) {
-                logger.error("Can not obtain the DB object!");
-            }
+        // Obtain the required core components
+        sobjDB = db;
 
-            try {
-                bc.addServiceListener(this, SREF_FILTER_PLUGIN);
-            } catch (InvalidSyntaxException e) {
-                logger.error("Invalid filter syntax ", e);
-            }
-
-            logger.debug("The PluginAdmin component was successfully started.");
+        try {
+            bc.addServiceListener(this, SREF_FILTER_PLUGIN);
+        } catch (InvalidSyntaxException e) {
+            logger.error("Invalid filter syntax ", e);
         }
-        else {
-            logger.error("Can not obtain the Core object!");
-        }
+
+        logger.debug("The PluginAdmin component was successfully started.");
     }
 
     /**
