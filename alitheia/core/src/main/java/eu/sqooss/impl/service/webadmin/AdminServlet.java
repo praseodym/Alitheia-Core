@@ -64,46 +64,52 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class AdminServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private static BundleContext bc = null;
-    private static WebadminService webadmin = null;
+
+    private WebadminService webadmin = null;
 
     /// Logger given by our owner to write log messages to.
     private Logger logger = null;
-    
-    private DBService db = null;
+
+    @Autowired
+    private DBService db;
 
     // Content tables
     private Hashtable<String, String> dynamicContentMap = null;
     private Hashtable<String, Pair<String, String>> staticContentMap = null;
 
     // Dynamic substitutions
-    VelocityContext vc = null;
+    @Autowired
+    VelocityContext vc;
     VelocityEngine ve = null;
 
     // Renderer of content
-    WebAdminRenderer adminView = null;
+    @Autowired
+    WebAdminRenderer adminView;
 
     // Plug-ins view
-    PluginsView pluginsView = null;
+    @Autowired
+    PluginsView pluginsView;
 
     // Projects view
-    ProjectsView projectsView = null;
+    @Autowired
+    ProjectsView projectsView;
 
     TranslationProxy tr = new TranslationProxy();
-    
+
     public AdminServlet(BundleContext bc,
-            WebadminService webadmin,
             Logger logger,
             VelocityEngine ve,
-            DBService db) {
-        AdminServlet.webadmin = webadmin;
+            WebadminService webadmin) {
         AdminServlet.bc = bc;
         this.ve = ve;
         this.logger = logger;
-        
+        this.webadmin = webadmin;
+
         AlitheiaCore core = AlitheiaCore.getInstance();
         this.db = db;
         
@@ -137,14 +143,6 @@ public class AdminServlet extends HttpServlet {
         dynamicContentMap.put("/users", "users.html");
         dynamicContentMap.put("/rules", "rules.html");
         dynamicContentMap.put("/jobstat", "jobstat.html");
-
-        // Now the dynamic substitutions and renderer
-        vc = new VelocityContext();
-        adminView = new WebAdminRenderer(bc, vc);
-
-        // Create the various view objects
-        pluginsView = new PluginsView(bc, vc);
-        projectsView = new ProjectsView(bc, vc);
     }
 
     /**
@@ -313,7 +311,7 @@ public class AdminServlet extends HttpServlet {
         vc.put("UPTIME", WebAdminRenderer.getUptime());
 
         // Object-based substitutions
-        vc.put("scheduler", adminView.sobjSched.getSchedulerStats());
+        vc.put("scheduler", AlitheiaCore.getInstance().getScheduler().getSchedulerStats());
         vc.put("tr",tr); // translations proxy
         vc.put("admin",adminView);
         vc.put("projects",projectsView);

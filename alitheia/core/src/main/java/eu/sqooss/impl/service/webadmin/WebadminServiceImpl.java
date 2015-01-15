@@ -35,6 +35,7 @@ package eu.sqooss.impl.service.webadmin;
 
 import java.util.Hashtable;
 
+import eu.sqooss.core.SpringApplication;
 import eu.sqooss.service.db.DBService;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
@@ -75,7 +76,7 @@ public class WebadminServiceImpl implements WebadminService {
 
     private BundleContext bc;
 
-    public WebadminServiceImpl(BundleContext bc, DBService db) {
+    public WebadminServiceImpl(BundleContext bc, DBService db, SpringApplication springApplication) {
         this.bc = bc;
         // Get a reference to the HTTPService, and then its object
         HttpService sobjHTTPService = null;
@@ -96,7 +97,7 @@ public class WebadminServiceImpl implements WebadminService {
             try {
                 sobjHTTPService.registerServlet(
                         "/",
-                        new AdminServlet(bc, this, logger, ve, db),
+                        springApplication.adminServlet(logger, ve, this),
                         new Hashtable(),
                         null);
             }

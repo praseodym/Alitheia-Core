@@ -11,7 +11,7 @@ import eu.sqooss.impl.service.rest.ResteasyServiceImpl;
 import eu.sqooss.impl.service.scheduler.SchedulerServiceImpl;
 import eu.sqooss.impl.service.tds.TDSServiceImpl;
 import eu.sqooss.impl.service.updater.UpdaterServiceImpl;
-import eu.sqooss.impl.service.webadmin.WebadminServiceImpl;
+import eu.sqooss.impl.service.webadmin.*;
 import eu.sqooss.service.admin.AdminService;
 import eu.sqooss.service.cluster.ClusterNodeService;
 import eu.sqooss.service.db.DBService;
@@ -24,7 +24,10 @@ import eu.sqooss.service.scheduler.Scheduler;
 import eu.sqooss.service.tds.TDSService;
 import eu.sqooss.service.updater.UpdaterService;
 import eu.sqooss.service.webadmin.WebadminService;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -37,6 +40,7 @@ import org.springframework.context.annotation.Lazy;
 @Configuration
 @Lazy
 public class SpringApplication {
+
     public static class BundleContextHolder {
         private BundleContext bundleContext;
 
@@ -123,6 +127,33 @@ public class SpringApplication {
 
     @Bean
     WebadminService webadminService() {
-        return new WebadminServiceImpl(bundleContext(), dbService());
+        return new WebadminServiceImpl(bundleContext(), dbService(), this);
+    }
+
+    @Bean
+    VelocityContext velocityContext() {
+        return new VelocityContext();
+    }
+
+    @Bean
+    WebAdminRenderer webAdminRenderer() {
+        return new WebAdminRenderer(bundleContext(), velocityContext());
+    }
+
+    @Bean
+    PluginsView pluginsView() {
+        return new PluginsView(bundleContext(), velocityContext());
+    }
+
+    @Bean
+    ProjectsView projectsView() {
+        return new ProjectsView(bundleContext(), velocityContext());
+    }
+
+    @Bean
+    // TODO: refactor to remove parameters
+    // Maybe create AdminServlet in WebadminService-postconstruct to avoid circular dependency.
+    public AdminServlet adminServlet(Logger logger, VelocityEngine ve, WebadminService webadminService) {
+        return new AdminServlet(bundleContext(), logger, ve, webadminService);
     }
 }
