@@ -68,16 +68,6 @@ public class LogManagerImpl implements LogManager {
         //     PropertyConfigurator.configure("/log4j.properties");
         // The default configuration will suppress this info message:
 
-        Enumeration<URL> props;
-        Properties p = new Properties();
-        try {
-            props = getClass().getClassLoader().getResources("log4j.properties");
-            p.load(props.nextElement().openStream());
-        } catch (Exception e) {
-            System.err.println("Logging initialisation failed, " +
-                    "cannot find log4j.properties file:" + e);
-        }
-        PropertyConfigurator.configure(p);
         org.apache.log4j.Logger.getRootLogger().info("Logging initialized.");
         CyclicLogger l = new CyclicLogger();
         String pattern = bc.getProperty("eu.sqooss.logbuffer.pattern");
@@ -88,7 +78,7 @@ public class LogManagerImpl implements LogManager {
             org.apache.log4j.Logger.getRootLogger().info("Logging to buffer with simple layout.");
             l.setLayout(new SimpleLayout());
         }
-        l.setThreshold(org.apache.log4j.Level.WARN);
+//        l.setThreshold(org.apache.log4j.Level.WARN);
         org.apache.log4j.Logger.getRootLogger().addAppender(l);
         cyclicLogger = l;
 
