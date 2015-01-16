@@ -63,7 +63,11 @@ public class AlitheiaCore {
 
     /* Service Configuration */
     @Autowired
-    RestService restService;
+    LogManager logManager;
+    @Autowired
+    DBService dbService;
+    @Autowired
+    PluginAdmin pluginAdmin;
     @Autowired
     Scheduler scheduler;
     @Autowired
@@ -79,13 +83,9 @@ public class AlitheiaCore {
     @Autowired
     WebadminService webadminService;
     @Autowired
+    RestService restService;
+    @Autowired
     AdminService adminService;
-    @Autowired
-    LogManager logManager;
-    @Autowired
-    DBService dbService;
-    @Autowired
-    PluginAdmin pluginAdmin;
 
     /**
      * Simple constructor.
