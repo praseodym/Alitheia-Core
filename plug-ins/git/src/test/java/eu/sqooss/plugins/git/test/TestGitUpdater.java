@@ -6,14 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -24,9 +18,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import eu.sqooss.core.AlitheiaCore;
-import eu.sqooss.impl.service.db.DBServiceImpl;
-import eu.sqooss.impl.service.logging.LogManagerImpl;
 import eu.sqooss.plugins.updater.git.GitUpdater;
 import eu.sqooss.service.db.DBService;
 import eu.sqooss.service.db.Developer;
@@ -35,13 +26,10 @@ import eu.sqooss.service.db.ProjectFile;
 import eu.sqooss.service.db.ProjectFileState;
 import eu.sqooss.service.db.ProjectVersion;
 import eu.sqooss.service.db.StoredProject;
-import eu.sqooss.service.logging.LogManager;
 import eu.sqooss.service.tds.AccessorException;
-import eu.sqooss.service.tds.CommitLog;
-import eu.sqooss.service.tds.InvalidProjectRevisionException;
-import eu.sqooss.service.tds.InvalidRepositoryException;
 import eu.sqooss.service.tds.Revision;
 import org.slf4j.Logger;
+import org.springframework.context.ConfigurableApplicationContext;
 
 public class TestGitUpdater extends TestGitSetup {
 
@@ -53,52 +41,9 @@ public class TestGitUpdater extends TestGitSetup {
     @BeforeClass
     public static void setup() throws IOException, URISyntaxException {
         initTestRepo();
-        
-        Properties conProp = new Properties();
-        conProp.setProperty("hibernate.connection.driver_class", "org.hsqldb.jdbcDriver");
-        conProp.setProperty("hibernate.connection.url", "jdbc:hsqldb:file:alitheia.db");
-        conProp.setProperty("hibernate.connection.username", "sa");
-        conProp.setProperty("hibernate.connection.password", "");
-        conProp.setProperty("hibernate.connection.host", "localhost");
-        conProp.setProperty("hibernate.connection.dialect", "org.hibernate.dialect.HSQLDialect");
-        conProp.setProperty("hibernate.connection.provider_class", "org.hibernate.connection.DriverManagerConnectionProvider");
-        
-//        conProp.setProperty("hibernate.connection.driver_class", "com.mysql.jdbc.Driver");
-//        conProp.setProperty("hibernate.connection.url", "jdbc:mysql://localhost/alitheia?useUnicode=true&amp;connectionCollation=utf8_general_ci&amp;characterSetResults=utf8");
-//        conProp.setProperty("hibernate.connection.username", "root");
-//        conProp.setProperty("hibernate.connection.password", "george");
-//        conProp.setProperty("hibernate.connection.host", "localhost");
-//        conProp.setProperty("hibernate.connection.dialect", "org.hibernate.dialect.MySQLInnoDBDialect");
-//        conProp.setProperty("hibernate.connection.provider_class", "org.hibernate.connection.DriverManagerConnectionProvider");
 
-        File root = new File(System.getProperty("user.dir"));
-        File config = null;
-        while (true) {
-            String[] extensions = { "xml" };
-            boolean recursive = true;
-
-            Collection files = FileUtils.listFiles(root, extensions, recursive);
-
-            for (Iterator iterator = files.iterator(); iterator.hasNext();) {
-                File file = (File) iterator.next();
-                if (file.getName().equals("hibernate.cfg.xml")) {
-                    config = file;
-                    break;
-                }
-            }
-
-            if (config == null)
-                root = root.getParentFile();
-            else
-                break;
-        }
-        
-        LogManager lm = new LogManagerImpl(true);
-//        l = lm.createLogger("sqooss.updater");
-        
-        AlitheiaCore.testInstance();
-        
-        db = new DBServiceImpl(conProp, config.toURL() , l);
+        ConfigurableApplicationContext context = SpringTestApplication.initialiseSpringTestContext();
+        db = context.getBean(DBService.class);
         db.startDBSession();
         sp = new StoredProject();
         sp.setName(projectName);
@@ -112,7 +57,7 @@ public class TestGitUpdater extends TestGitSetup {
         assertNotNull(git);
         updater = new GitUpdater(db, git, l, sp);
     }
-    
+
     @Test
     public void testGetAuthor() {
         db.startDBSession();
@@ -168,8 +113,8 @@ public class TestGitUpdater extends TestGitSetup {
         FileRepository local =  new FileRepository(repo);
         Revision from = git.getFirstRevision();
         Revision to = git.getNextRevision(from);
-        Revision upTo = git.newRevision("94f389bf5d9af4511597d035e69d1be9510b50c7");
-        
+        Revision upTo = git.newRevision("2ade9340262cb87163b5c5c270268175ff3b3c15");
+
         while (to.compareTo(upTo) < 0) {
             ArrayList<ProjectFile> foundFiles = new ArrayList<ProjectFile>();
           
@@ -183,12 +128,12 @@ public class TestGitUpdater extends TestGitSetup {
             TreeWalk tw = new TreeWalk(local);
             tw.addTree(commit.getTree());
             tw.setRecursive(true);
-            
+
             db.startDBSession();
             sp = db.attachObjectToDBSession(sp);
             ProjectVersion pv = ProjectVersion.getVersionByRevision(sp, from.getUniqueId());
             assertNotNull(pv);
-            
+
             //Compare repository files against database files
             while (tw.next()) {
                 String path = "/" + tw.getPathString();
@@ -215,7 +160,7 @@ public class TestGitUpdater extends TestGitSetup {
             		assertTrue(false);
             	}
             }
-            
+
             db.commitDBSession();
             tw.release();
             rw.release();

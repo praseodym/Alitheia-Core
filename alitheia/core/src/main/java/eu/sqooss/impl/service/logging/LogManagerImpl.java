@@ -61,33 +61,30 @@ public class LogManagerImpl implements LogManager {
     private CyclicLogger cyclicLogger = null;
 
     public LogManagerImpl(BundleContext bc) {
-        this.bc = bc;
-        loggers = new HashMap<String, LoggerImpl>();
-        // The configuration is read automatically from the file log4j.properties
-        // in the bundle .jar ; this is much like calling:
-        //     PropertyConfigurator.configure("/log4j.properties");
-        // The default configuration will suppress this info message:
+        if (bc != null) {
+            this.bc = bc;
+            loggers = new HashMap<String, LoggerImpl>();
+            // The configuration is read automatically from the file log4j.properties
+            // in the bundle .jar ; this is much like calling:
+            //     PropertyConfigurator.configure("/log4j.properties");
+            // The default configuration will suppress this info message:
 
-        org.apache.log4j.Logger.getRootLogger().info("Logging initialized.");
-        CyclicLogger l = new CyclicLogger();
-        String pattern = bc.getProperty("eu.sqooss.logbuffer.pattern");
-        if (pattern != null) {
-            org.apache.log4j.Logger.getRootLogger().info("Logging to buffer with pattern <" + pattern + ">");
-            l.setLayout(new PatternLayout(pattern));
-        } else {
-            org.apache.log4j.Logger.getRootLogger().info("Logging to buffer with simple layout.");
-            l.setLayout(new SimpleLayout());
-        }
+            org.apache.log4j.Logger.getRootLogger().info("Logging initialized.");
+            CyclicLogger l = new CyclicLogger();
+            String pattern = bc.getProperty("eu.sqooss.logbuffer.pattern");
+            if (pattern != null) {
+                org.apache.log4j.Logger.getRootLogger().info("Logging to buffer with pattern <" + pattern + ">");
+                l.setLayout(new PatternLayout(pattern));
+            } else {
+                org.apache.log4j.Logger.getRootLogger().info("Logging to buffer with simple layout.");
+                l.setLayout(new SimpleLayout());
+            }
 //        l.setThreshold(org.apache.log4j.Level.WARN);
-        org.apache.log4j.Logger.getRootLogger().addAppender(l);
-        cyclicLogger = l;
+            org.apache.log4j.Logger.getRootLogger().addAppender(l);
+            cyclicLogger = l;
 
-        logManager = this;
-    }
-
-    public LogManagerImpl(boolean testInit) {
-        logManager = new LogManagerImpl(null);
-        loggers = new HashMap<String, LoggerImpl>();
+            logManager = this;
+        }
     }
     
     public Logger createLogger(String name) {

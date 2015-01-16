@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 public class CoreActivator implements BundleActivator {
@@ -54,30 +55,12 @@ public class CoreActivator implements BundleActivator {
     private ConfigurableApplicationContext context;
 
     public void start(BundleContext bc) throws Exception {
-        // Initialize logging immediately
-        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-        try {
-            JoranConfigurator configurator = new JoranConfigurator();
-            configurator.setContext(loggerContext);
-            // Call context.reset() to clear any previous configuration, e.g. default
-            // configuration. For multi-step configuration, omit calling context.reset().
-            loggerContext.reset();
-            InputStream config = getClass().getClassLoader().getResources("logback.xml").nextElement().openStream();
-            configurator.doConfigure(config);
-        } catch (JoranException je) {
-            // StatusPrinter will handle this
-        }
-        StatusPrinter.printInCaseOfErrorsOrWarnings(loggerContext);
-        Logger logger = LoggerFactory.getLogger(CoreActivator.class);
-        logger.info("Logger initialised in CoreActivator");
-
-        context = new AnnotationConfigApplicationContext(SpringApplication.class);
-        context.getBean(SpringApplication.BundleContextHolder.class).setBundleContext(bc);
-        /* Keeps the <code>AlitheaCore</code> instance. */
+        SpringApplication.initialiseLogger();
+        context = SpringApplication.initialiseSpringContext(bc);
         AlitheiaCore core = context.getBean(AlitheiaCore.class);
         sregCore = bc.registerService(AlitheiaCore.class.getName(), core, null);
     }
-  
+
     public void stop(BundleContext bc) throws Exception {
         context.close();
     	if (sregCore != null) {
